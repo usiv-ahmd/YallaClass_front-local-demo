@@ -50,6 +50,37 @@ export default function SessionsDetailes({
               كل شيء جاهز للحصة
             </span>
           )}
+          {selectedSession.status !== "completed" && (
+            <>
+              <button
+                className="icon-button delete-session-button"
+                type="button"
+                onClick={() => requestDelete(selectedSession.id)}
+                aria-label="حذف الحصة"
+                title="حذف الحصة"
+              >
+                <Trash2 size={17} />
+              </button>
+              
+              {selectedSession.status === "draft" ? (
+                <button 
+                  className="button-primary schedule-session-button" 
+                  type="button" 
+                  onClick={onSchedule}
+                >
+                  <CalendarDays size={16} /> جدول الحصة
+                </button>
+              ) : (
+                <button 
+                  className="button-primary launch-session-button" 
+                  type="button" 
+                  onClick={null}
+                >
+                  <Play size={16} fill="currentColor" /> ابدأ الحصة
+                </button>
+              )}
+            </>
+          )}
         </div>
         <div className="session-meta-row">
           <div className="session-meta-item"><span className="meta-icon"><CalendarDays size={16} /></span><span><small>التاريخ</small><strong>{selectedSession.date}</strong></span></div>

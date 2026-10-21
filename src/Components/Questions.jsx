@@ -25,17 +25,27 @@ export default function Questions({ session, onChange, isCompleted }) {
 
   function addQuestion(event) {
     event.preventDefault();
-    const question = {
+
+    const trimmedOptions = options.map((option) => option.trim());
+    
+    if (trimmedOptions.length < 2) {
+      alert("لازم يكون فيه على الأقل خيارين");
+      return;
+    }
+
+    const newQuestion = {
       id: makeId("question"),
       question: text.trim(),
       text: text.trim(),
-      options: options.map((option) => option.trim()),
+      options: trimmedOptions,
       correctOptionIndex: correctIndex,
       source: "manual",
       correctAnswer: trimmedOptions[correctIndex],
       type: "mcq",
     };
-    onChange([...session.questions, question]);
+
+    onChange([...questions, newQuestion]);
+
     setText("");
     setOptions(["", "", "", ""]);
     setCorrectIndex(0);

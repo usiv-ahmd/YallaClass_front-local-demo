@@ -68,7 +68,7 @@ body {
 
 .rounded-div {
   background: var(--C-yalla-navy-light);
-  border: var(--C-yalla-border);
+  border: 5px solid var(--C-yalla-border-dark);
   box-shadow: var(--yalla-shadow);
   border-radius: 24px;
 }
