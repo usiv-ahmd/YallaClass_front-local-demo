@@ -76,6 +76,8 @@ function App() {
   };
 
   const createSession = useCreateSession();
+  const editSession = useEditSession();
+  const deleteSession = useDeleteSession();
   const handleCreateSession = (data) => {
     const newSession = {
       id: `s-${Date.now()}`,
@@ -89,7 +91,6 @@ function App() {
     setSelectedId(newSession.id);
     createSession.close();
   };
-  const editSession = useEditSession();
   const handleUpdateSession = (data) => {
     setSessionsList((prev) =>
       prev.map((s) => {
@@ -101,8 +102,6 @@ function App() {
     );
     editSession.close();
   };
-  
-  const deleteSession = useDeleteSession();
   const handleConfirmDelete = () => {
     setSessionsList((prev) => {
       const next = prev.filter((s) => s.id !== deleteSession.sessionId);
@@ -112,6 +111,13 @@ function App() {
       return next;
     });
     deleteSession.close();
+  };
+  const handleScheduleSession = () => {
+    setSessionsList((prev) =>
+      prev.map((s) => 
+        s.id === selectedId ? { ...s, status: "scheduled" } : s
+      )
+    );
   };
 
   return (
@@ -295,6 +301,7 @@ function App() {
               onQuestionsChange={handleQuestionsChange}
               requestDelete={deleteSession.requestDelete}
               onEdit={editSession.open}
+              onSchedule={handleScheduleSession}
               handleFileUpload={handleFileUpload}
               isUploading={isUploading}
               createSession={createSession}

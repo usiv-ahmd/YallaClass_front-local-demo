@@ -7,6 +7,7 @@ import Attendanceboard from './AttendanceBoard.jsx';
 export default function SessionsDetailes({
   session: selectedSession, 
   onEdit,
+  onSchedule,
   students,
   handleFileUpload,
   requestDelete,
@@ -59,7 +60,7 @@ export default function SessionsDetailes({
               <button 
                 className="button-primary schedule-session-button" 
                 type="button" 
-                onClick={null}
+                onClick={onSchedule}
               >
                 <CalendarDays size={16} /> جدول الحصة
               </button>
