@@ -46,27 +46,50 @@ function App() {
   const endedSession = sessionsList.filter((s) => s.status === "completed").length;
   const draftedSession = sessionsList.filter((s) => s.status === "draft").length;
 
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file || !selectedSession) return;
+
     setIsUploading(true);
-    setTimeout(() => {
-      setIsUploading(false);
-      const aiGeneratedQ = {
-        id: `ai-${Date.now()}`,
-        question: `سؤال ذكي مستخرج من ملف (${file.name}): ما الفكرة الأساسية؟`,
-        options: ["الخيار الصحيح", "خيار 1", "خيار 2", "خيار 3"],
-        correctAnswer: "الخيار الصحيح",
-        type: "ai",
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("sessionId", selectedSession.id);
+
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      const result = {
+        fileUrl: `https://mock-storage.com/files/${file.name}`,
+        fileName: file.name,
+        aiQuestion: {
+          id: `ai-${Date.now()}`,
+          question: `سؤال ذكي مستخرج من ملف (${file.name}): ما الفكرة الأساسية؟`,
+          options: ["الخيار الصحيح", "خيار 1", "خيار 2", "خيار 3"],
+          correctAnswer: "الخيار الصحيح",
+          type: "ai",
+        }
       };
+
       setSessionsList((prev) =>
-        prev.map((s) =>
-          s.id === selectedSession.id
-            ? { ...s, fileAttached: file.name, questions: [...s.questions, aiGeneratedQ] }
-            : s
-        )
+        prev.map((s) => {
+          if (s.id === selectedSession.id) {
+            return {
+              ...s,
+              files: [...(s.files || []), { name: result.fileName, url: result.fileUrl }],
+              questions: [...s.questions, result.aiQuestion],
+            };
+          }
+          return s;
+        })
       );
-    }, 1500);
+      
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      alert("حصل خطأ أثناء رفع الملف");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleQuestionsChange = (newQuestions) => {

@@ -11,6 +11,7 @@ export const initialMockData = {
       date: "2026-02-05",
       time: "10:00",
       studentnumber: "5",
+      files: [],
       students: [
         {
           id: 1,
@@ -65,6 +66,7 @@ export const initialMockData = {
       date: "2026-10-05",
       time: "10:00",
       studentnumber: "10",
+      files: [],
       students: [
         {
           id: 11,
@@ -146,6 +148,7 @@ export const initialMockData = {
       date: "2026-10-05",
       time: "10:00",
       studentnumber: "10",
+      files: [],
       students: [
         {
           id: 11,

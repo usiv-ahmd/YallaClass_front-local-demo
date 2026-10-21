@@ -122,9 +122,16 @@ export default function SessionsDetailes({
                 <small>سيتم استخراج أسئلة تلقائية بالذكاء الاصطناعي للجلسة الحالية</small>
               </label>
 
-              {selectedSession.fileAttached && (
-                <div className="attached-file-badge">
-                  <FileText size={14} /> الملف المرفق: <b>{selectedSession.fileAttached}</b>
+              {selectedSession.files && selectedSession.files.length > 0 && (
+                <div className="attached-files-list">
+                  {selectedSession.files.map((f, idx) => (
+                    <div key={idx} className="attached-file-badge">
+                      <FileText size={14} /> الملف المرفق: <b>{f.name}</b>
+                      <a href={f.url} target="_blank" rel="noreferrer" style={{color: 'var(--C-yalla-turquoise)', marginRight: '8px'}}>
+                        (عرض)
+                      </a>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
