@@ -34,50 +34,22 @@ export default function SessionsDetailes({
             <div className="session-detail-icon"><BookOpen size={23} /></div>
             <div className="session-title-block"><div className="detail-overline"><span className={`status-dot ${selectedSession.status}`} />{selectedSession.status === "draft" ? "مسودة" : selectedSession.status === "completed" ? "مكتملة" : "حصة مجدولة"}<span className="detail-overline-separator">/</span><p>{selectedSession.subject}</p><span className="detail-overline-separator">/</span><span>{selectedSession.code}</span></div><h2>{selectedSession.title}</h2></div>
           </div>
-          <div className="selected-session-actions">   
-            {selectedSession.status === "draft" 
-              ? <span className="overview-status overview-status-check">
-                  <Check size={16} />
-                  لم يتم تنبيه الطلاب بعد!
-                </span>
-              : <span className="overview-status overview-status-doublecheck">
-                  <CheckCheck size={16} />
-                  كل شيء جاهز للحصة
-                </span>
-            }
-            
-            {selectedSession.status !== "completed" && (
-              <>
-                <button
-                  className="icon-button delete-session-button"
-                  type="button"
-                  onClick={() => requestDelete(selectedSession.id)}
-                  aria-label="حذف الحصة"
-                  title="حذف الحصة"
-                >
-                  <Trash2 size={17} />
-                </button>
-                
-                {selectedSession.status === "draft" ? (
-                  <button 
-                    className="button-primary schedule-session-button" 
-                    type="button" 
-                    onClick={onSchedule}
-                  >
-                    <CalendarDays size={16} /> جدول الحصة
-                  </button>
-                ) : (
-                  <button 
-                    className="button-primary launch-session-button" 
-                    type="button" 
-                    onClick={null} // Or whatever function for starting
-                  >
-                    <Play size={16} fill="currentColor" /> ابدأ الحصة
-                  </button>
-                )}
-              </>
-            )}
-          </div>
+          {selectedSession.status === "draft" ? (
+            <span className="overview-status overview-status-check">
+              <Check size={16} />
+              لم يتم تنبيه الطلاب بعد!
+            </span>
+          ) : selectedSession.status === "completed" ? (
+            <span className="overview-status overview-status-completed">
+              <CheckCheck size={16} />
+              انتهت الحصة
+            </span>
+          ) : (
+            <span className="overview-status overview-status-doublecheck">
+              <CheckCheck size={16} />
+              كل شيء جاهز للحصة
+            </span>
+          )}
         </div>
         <div className="session-meta-row">
           <div className="session-meta-item"><span className="meta-icon"><CalendarDays size={16} /></span><span><small>التاريخ</small><strong>{selectedSession.date}</strong></span></div>
