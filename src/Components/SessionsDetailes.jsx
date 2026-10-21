@@ -1,17 +1,21 @@
-import { Sparkles, CalendarDays, Check, CheckCheck, Clock3, UsersRound, Play, Trash2, UploadCloud, FileText, BookOpen, Settings2, Plus } from "lucide-react";
+import { useState } from "react";
+import { Sparkles, CalendarDays, Check, CheckCheck, Clock3, UsersRound, Play, Trash2, UploadCloud, FileText, BookOpen, Settings2, Plus, AlertTriangle } from "lucide-react";
 import Questions from "./Questions.jsx";
 import Leaderboard from './LeaderBoard.jsx';
 import Attendanceboard from './AttendanceBoard.jsx';
 
 export default function SessionsDetailes({
-  session: selectedSession,
+  session: selectedSession, 
+  onEdit,
   students,
   handleFileUpload,
-  deleteSession,
+  requestDelete,
   isUploading,
   createSession,
   onQuestionsChange 
 }) {
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   if (!selectedSession) {
     return (
@@ -41,11 +45,11 @@ export default function SessionsDetailes({
                 </span>
             }
             
-            <button 
-              className="icon-button delete-session-button" 
-              type="button" 
-              onClick={deleteSession} 
-              aria-label="حذف الحصة" 
+            <button
+              className="icon-button delete-session-button"
+              type="button"
+              onClick={() => requestDelete(selectedSession.id)}
+              aria-label="حذف الحصة"
               title="حذف الحصة"
             >
               <Trash2 size={17} />
@@ -74,7 +78,11 @@ export default function SessionsDetailes({
           <div className="session-meta-item"><span className="meta-icon"><CalendarDays size={16} /></span><span><small>التاريخ</small><strong>{selectedSession.date}</strong></span></div>
           <div className="session-meta-item"><span className="meta-icon"><Clock3 size={16} /></span><span><small>الموعد</small><strong>{selectedSession.time}</strong></span></div>
           <div className="session-meta-item"><span className="meta-icon"><UsersRound size={16} /></span><span><small>الطلاب</small><strong>{selectedSession.studentnumber} مشارك</strong></span></div>
-          <button className="session-meta-settings" type="button" onClick={null}><Settings2 size={15} /> تفاصيل الحصة</button>
+          {selectedSession.status !== "completed" && (
+            <button className="session-meta-settings" type="button" onClick={onEdit}>
+              <Settings2 size={15} /> تفاصيل الحصة
+            </button>
+          )}
         </div>
       </div>
         

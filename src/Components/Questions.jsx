@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookOpenCheck, Check, Minus, Plus, Trash2, X } from "lucide-react";
+import { BookOpenCheck, Check, Minus, Plus, Trash2, X, Sparkles } from "lucide-react";
 
 export function makeId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -66,7 +66,11 @@ export default function Questions({ session, onChange, isCompleted }) {
         </div>
         <span className="count-pill">{questions.length.toLocaleString("ar-EG")} سؤال</span>
       </div>
-      <p className="panel-description">أسئلتك التي كتبتها بنفسك — منفصلة عن مساحة أسئلة الذكاء الاصطناعي.</p>
+      <p className="panel-description">
+        {isCompleted 
+        ? "دي الأسئلة اللي كانت معانا في الدرس." 
+        : "اكتب الأسئلة اللي انت عايزها أو ارفع ملف وسيب الـ AI يعملهالك."}
+      </p>
 
       {questions.length > 0 ? (
         <div className="question-list">
@@ -77,8 +81,17 @@ export default function Questions({ session, onChange, isCompleted }) {
             return (
               <article className="question-card" key={question.id ?? index}>
                 <div className="question-card-topline">
-                  <span className="question-number">{`${index + 1}`.padStart(2, "0")}</span>
-                  <span className="source-label manual-source"><i /> يدوي</span>
+                  <span className={`question-number ${question.source === "ai" ? "ai-source" : "manual-source"}`}>
+                    {`${index + 1}`.padStart(2, "0")}
+                  </span>
+                  <span className={`source-label ${question.source === "ai" ? "ai-source" : "manual-source"}`}>
+                    {question.source === "ai" ? (
+                      <Sparkles size={10} />
+                    ) : (
+                      <i />
+                    )}{" "}
+                    {question.source === "ai" ? "ذكاء اصطناعي" : "يدوي"}
+                  </span>
                   {!isCompleted && (
                     <button
                       className="delete-question-button"

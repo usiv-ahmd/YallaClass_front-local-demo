@@ -3,6 +3,9 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound } from "l
 import SessionsDetailes from "./Components/SessionsDetailes.jsx";
 import CreateSession from "./Components/CreateSession.jsx";
 import useCreateSession from "./hook/useCreateSession.js";
+import useEditSession from './hook/useEditSession.js';
+import DeleteSession from "./Components/DeleteSession.jsx";
+import useDeleteSession from './hook/useDeleteSession.js';
 import { initialMockData } from "./mock/mockData.js";
 import "./App.css";
 
@@ -73,17 +76,11 @@ function App() {
   };
 
   const createSession = useCreateSession();
-
   const handleCreateSession = (data) => {
     const newSession = {
       id: `s-${Date.now()}`,
-      title: data.title,
-      subject: data.subject || "—",
+      ...data,
       code: `S-${Date.now().toString().slice(-4)}`,
-      status: data.status || "scheduled",
-      date: data.date,
-      time: data.time,
-      duration: data.duration,
       studentnumber: "0",
       students: [],
       questions: [],
@@ -92,12 +89,29 @@ function App() {
     setSelectedId(newSession.id);
     createSession.close();
   };
-  const handleDeleteSession = (id) => {
+  const editSession = useEditSession();
+  const handleUpdateSession = (data) => {
+    setSessionsList((prev) =>
+      prev.map((s) => {
+        if (s.id === selectedId) {
+          return { ...s, ...data }; 
+        }
+        return s;
+      })
+    );
+    editSession.close();
+  };
+  
+  const deleteSession = useDeleteSession();
+  const handleConfirmDelete = () => {
     setSessionsList((prev) => {
-      const next = prev.filter((s) => s.id !== id);
-      if (id === selectedId) setSelectedId(next[0]?.id ?? null);
+      const next = prev.filter((s) => s.id !== deleteSession.sessionId);
+      if (deleteSession.sessionId === selectedId) {
+        setSelectedId(next[0]?.id ?? null);
+      }
       return next;
     });
+    deleteSession.close();
   };
 
   return (
@@ -279,7 +293,8 @@ function App() {
               session={selectedSession}
               students={selectedSession?.students || []}
               onQuestionsChange={handleQuestionsChange}
-              deleteSession={handleDeleteSession}
+              requestDelete={deleteSession.requestDelete}
+              onEdit={editSession.open}
               handleFileUpload={handleFileUpload}
               isUploading={isUploading}
               createSession={createSession}
@@ -292,6 +307,22 @@ function App() {
         <CreateSession
           onClose={createSession.close}
           onSubmit={handleCreateSession}
+        />
+      )}
+
+      {editSession.isOpen && (
+        <CreateSession
+          initialData={selectedSession}
+          onClose={editSession.close}
+          onSubmit={handleUpdateSession}
+        />
+      )}
+      
+      {deleteSession.isOpen && (
+        <DeleteSession
+          onClose={deleteSession.close}
+          onConfirm={handleConfirmDelete}
+          sessionTitle={sessionsList.find((s) => s.id === deleteSession.sessionId)?.title}
         />
       )}
     </>

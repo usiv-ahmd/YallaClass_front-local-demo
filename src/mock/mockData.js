@@ -49,6 +49,7 @@ export const initialMockData = {
           question: "ما هي عاصمة مصر؟",
           options: ["القاهرة", "الإسكندرية", "أسوان", "الجيزة"],
           correctAnswer: "القاهرة",
+          source: "manual",
           type: "mcq",
       
         },
@@ -102,6 +103,7 @@ export const initialMockData = {
           question: "1 + 2",
           options: ["3", "1", "5", "4"],
           correctAnswer: "3",
+          source: "ai",
           type: "mcq",
       
         },
@@ -110,6 +112,7 @@ export const initialMockData = {
           question: "1 + 2",
           options: ["3", "1", "5", "4"],
           correctAnswer: "3",
+          source: "manual",
           type: "mcq",
       
         },
@@ -118,6 +121,7 @@ export const initialMockData = {
           question: "1 + 2",
           options: ["3", "1", "5", "4"],
           correctAnswer: "3",
+          source: "manual",
           type: "mcq",
       
         },
@@ -126,6 +130,7 @@ export const initialMockData = {
           question: "1 + 2",
           options: ["3", "1", "5", "4"],
           correctAnswer: "3",
+          source: "manual",
           type: "mcq",
       
         },
@@ -179,6 +184,7 @@ export const initialMockData = {
           question: "I * R",
           options: ["V", "Q*Q", "S", "P"],
           correctAnswer: "V",
+          source: "manual",
           type: "mcq",
       
         },
