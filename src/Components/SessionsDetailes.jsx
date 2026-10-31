@@ -12,8 +12,10 @@ export default function SessionsDetailes({
   handleFileUpload,
   requestDelete,
   isUploading,
+  handleRemoveFile,
   createSession,
-  onQuestionsChange 
+  onQuestionsChange,
+  onStartLiveSession
 }) {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -21,14 +23,14 @@ export default function SessionsDetailes({
   if (!selectedSession) {
     return (
       <div className="no-session-state panel">
-        <div className="no-session-state panel"><div className="no-session-icon"><CalendarDays size={26} /></div><h2>أنشئ حصة جديدة او اختار حصة من حصصك</h2><p>حدّد ميعاد الحصة وبعدها أضف أسئلتك اليدوية. مساحة المادة جاهزة للربط لاحقًا.</p><button className="button-primary" type="button" onClick={createSession.open}><Plus size={17} /> إنشاء حصة جديدة</button></div>
+        <div className="no-session-state panel"><div className="no-session-icon"><CalendarDays size={26} /></div><h2>أنشئ حصة جديدة او اختار حصة من حصصك</h2><p>حدّد ميعاد الحصة وبعدها أضف أسئلتك اليدوية. مساحة المادة جاهزة للربط لاحقًا.</p><button className="button button-primary" type="button" onClick={createSession.open}><Plus size={17} /> إنشاء حصة جديدة</button></div>
       </div>
     );
   }
 
   return (
     <section className="session-workspace">
-      <div className="rounded-div selected-session-header">
+      <div className="card selected-session-header">
         <div className="selected-session-top">
           <div className="selected-session-main">
             <div className="session-detail-icon"><BookOpen size={23} /></div>
@@ -52,29 +54,19 @@ export default function SessionsDetailes({
           )}
           {selectedSession.status !== "completed" && (
             <>
-              <button
-                className="icon-button delete-session-button"
-                type="button"
-                onClick={() => requestDelete(selectedSession.id)}
-                aria-label="حذف الحصة"
-                title="حذف الحصة"
-              >
+              <button className="button icon-button delete-session-button" type="button" onClick={() => requestDelete(selectedSession.id)} aria-label="حذف الحصة" title="حذف الحصة">
                 <Trash2 size={17} />
               </button>
               
               {selectedSession.status === "draft" ? (
-                <button 
-                  className="button-primary schedule-session-button" 
-                  type="button" 
-                  onClick={onSchedule}
-                >
+                <button className="button button-primary schedule-session-button"  type="button"  onClick={onSchedule}>
                   <CalendarDays size={16} /> جدول الحصة
                 </button>
               ) : (
                 <button 
-                  className="button-primary launch-session-button" 
+                  className="button button-primary launch-session-button" 
                   type="button" 
-                  onClick={null}
+                  onClick={onStartLiveSession}
                 >
                   <Play size={16} fill="currentColor" /> ابدأ الحصة
                 </button>
@@ -83,11 +75,11 @@ export default function SessionsDetailes({
           )}
         </div>
         <div className="session-meta-row">
-          <div className="session-meta-item"><span className="meta-icon"><CalendarDays size={16} /></span><span><small>التاريخ</small><strong>{selectedSession.date}</strong></span></div>
-          <div className="session-meta-item"><span className="meta-icon"><Clock3 size={16} /></span><span><small>الموعد</small><strong>{selectedSession.time}</strong></span></div>
-          <div className="session-meta-item"><span className="meta-icon"><UsersRound size={16} /></span><span><small>الطلاب</small><strong>{selectedSession.studentnumber} مشارك</strong></span></div>
+          <div className="chip session-meta-item"><span className="meta-icon"><CalendarDays size={16} /></span><span><small>التاريخ</small><strong>{selectedSession.date}</strong></span></div>
+          <div className="chip session-meta-item"><span className="meta-icon"><Clock3 size={16} /></span><span><small>الموعد</small><strong>{selectedSession.time}</strong></span></div>
+          <div className="chip session-meta-item"><span className="meta-icon"><UsersRound size={16} /></span><span><small>الطلاب</small><strong>{selectedSession.studentnumber} مشارك</strong></span></div>
           {selectedSession.status !== "completed" && (
-            <button className="session-meta-settings" type="button" onClick={onEdit}>
+            <button className="button session-meta-settings" type="button" onClick={onEdit}>
               <Settings2 size={15} /> تفاصيل الحصة
             </button>
           )}
@@ -102,7 +94,7 @@ export default function SessionsDetailes({
         />
 
         {selectedSession.status !== "completed" && (
-          <div className="rounded-div screen material-upload-card">
+          <div className="card screen material-upload-card">
             <div className="card-heading-row">
               <div className="control-icon control-icon-purple"><Sparkles size={19} /></div>
               <div><span className="section-eyebrow">الذكاء الاصطناعي</span><h2>ارفع ملف الشرح وهنعمل لك الاسئله</h2></div>
@@ -130,6 +122,9 @@ export default function SessionsDetailes({
                       <a href={f.url} target="_blank" rel="noreferrer" style={{color: 'var(--C-yalla-turquoise)', marginRight: '8px'}}>
                         (عرض)
                       </a>
+                      <button type="button" className="attached-file-remove" onClick={() => handleRemoveFile(idx)} title="حذف الملف" aria-label={`حذف الملف ${f.name}`}>
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   ))}
                 </div>

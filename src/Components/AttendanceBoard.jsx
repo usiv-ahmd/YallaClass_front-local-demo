@@ -4,7 +4,7 @@ export default function Attendanceboard({ students = [], expectedCount }) {
   const attendedCount = students.filter((s) => s.attended).length;
 
   return (
-    <div className="rounded-div attendance-container">
+    <div className="card attendance-container">
       <div className="attendance-header">
         <div className="title-section">
           <div className="panel-icon attendance-icon"><ClipboardList size={19} /></div>

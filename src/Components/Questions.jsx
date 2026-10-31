@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookOpenCheck, Check, Minus, Plus, Trash2, X, Sparkles } from "lucide-react";
+import { BookOpenCheck, Check, Minus, Plus, Trash2, X, Sparkles, Clock } from "lucide-react";
 
 export function makeId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -23,15 +23,28 @@ export default function Questions({ session, onChange, isCompleted }) {
     ? session.questions
     : Object.values(session?.questions ?? {});
 
+  const [duration, setDuration] = useState(30);
+  const DURATIONS = [15, 30, 45, 60, 90, 120];
+
   function addQuestion(event) {
     event.preventDefault();
 
     const trimmedOptions = options.map((option) => option.trim());
-    
+
+    if (!text.trim()) {
+      alert("اكتب نص السؤال الأول");
+      return;
+    }
+    if (trimmedOptions.some((opt) => !opt)) {
+      alert("كل الخيارات لازم تكون مكتوبة");
+      return;
+    }
     if (trimmedOptions.length < 2) {
       alert("لازم يكون فيه على الأقل خيارين");
       return;
     }
+
+    const safeDuration = Math.min(120, Math.max(5, Number(duration) || 30));
 
     const newQuestion = {
       id: makeId("question"),
@@ -39,8 +52,9 @@ export default function Questions({ session, onChange, isCompleted }) {
       text: text.trim(),
       options: trimmedOptions,
       correctOptionIndex: correctIndex,
-      source: "manual",
       correctAnswer: trimmedOptions[correctIndex],
+      duration: safeDuration,
+      source: "manual",
       type: "mcq",
     };
 
@@ -49,6 +63,7 @@ export default function Questions({ session, onChange, isCompleted }) {
     setText("");
     setOptions(["", "", "", ""]);
     setCorrectIndex(0);
+    setDuration(30);
     setFormOpen(false);
   }
 
@@ -66,7 +81,7 @@ export default function Questions({ session, onChange, isCompleted }) {
   }
 
     return (
-    <section className="rounded-div questions-panel" aria-labelledby="questions-title">
+    <section className="card questions-panel" aria-labelledby="questions-title">
       <div className="panel-heading">
         <div className="panel-heading-title">
           <div className="panel-icon manual-icon"><BookOpenCheck size={19} /></div>
@@ -74,7 +89,7 @@ export default function Questions({ session, onChange, isCompleted }) {
             <h2 id="questions-title">الأسئلة</h2>
           </div>
         </div>
-        <span className="count-pill">{questions.length.toLocaleString("ar-EG")} سؤال</span>
+        <span className="count-pill">{questions.length} سؤال</span>
       </div>
       <p className="panel-description">
         {isCompleted 
@@ -87,6 +102,7 @@ export default function Questions({ session, onChange, isCompleted }) {
           {questions.map((question, index) => {
             const correctIdx = getCorrectIndex(question);
             const optionList = Array.isArray(question?.options) ? question.options : [];
+            const duration = Number(question?.duration) || 0;
 
             return (
               <article className="question-card" key={question.id ?? index}>
@@ -94,21 +110,24 @@ export default function Questions({ session, onChange, isCompleted }) {
                   <span className={`question-number ${question.source === "ai" ? "ai-source" : "manual-source"}`}>
                     {`${index + 1}`.padStart(2, "0")}
                   </span>
+
                   <span className={`source-label ${question.source === "ai" ? "ai-source" : "manual-source"}`}>
-                    {question.source === "ai" ? (
-                      <Sparkles size={10} />
-                    ) : (
-                      <i />
-                    )}{" "}
+                    {question.source === "ai" ? <Sparkles size={10} /> : <i />}{" "}
                     {question.source === "ai" ? "ذكاء اصطناعي" : "يدوي"}
                   </span>
+
+                  {duration > 0 && (
+                    <span className="duration-badge" title={`مدة السؤال ${duration} ثانية`}>
+                      <Clock size={11} />
+                      {duration} ث
+                    </span>
+                  )}
+
                   {!isCompleted && (
                     <button
                       className="delete-question-button"
                       type="button"
-                      onClick={() =>
-                        onChange(questions.filter((item) => item.id !== question.id))
-                      }
+                      onClick={() => onChange(questions.filter((item) => item.id !== question.id))}
                       aria-label={`حذف السؤال ${index + 1}`}
                     >
                       <Trash2 size={15} />
@@ -151,20 +170,13 @@ export default function Questions({ session, onChange, isCompleted }) {
             <form className="question-form" onSubmit={addQuestion}>
               <div className="form-heading">
                 <strong>سؤال جديد</strong>
-                <button className="icon-button subtle-icon" type="button" onClick={() => setFormOpen(false)} aria-label="إغلاق">
+                <button className="close-button" type="button" onClick={() => setFormOpen(false)} aria-label="إغلاق">
                   <X size={17} />
                 </button>
               </div>
               <label className="field-label">
                 نص السؤال
-                <textarea
-                  required
-                  maxLength={240}
-                  value={text}
-                  onChange={(event) => setText(event.target.value)}
-                  placeholder="اكتب السؤال بوضوح..."
-                  rows={2}
-                />
+                <textarea required maxLength={240} value={text} onChange={(event) => setText(event.target.value)} placeholder="اكتب السؤال بوضوح..." rows={2}/>
               </label>
               <div className="answer-options-grid">
                 {options.map((option, index) => (
@@ -172,49 +184,40 @@ export default function Questions({ session, onChange, isCompleted }) {
                     className={`answer-option-field ${correctIndex === index ? "is-correct" : ""}`}
                     key={index}
                   >
-                    <input
-                      className="correct-radio"
-                      type="radio"
-                      name={`correct-answer-${session.id}`}
-                      checked={correctIndex === index}
-                      onChange={() => setCorrectIndex(index)}
-                      aria-label={`اجعل الخيار ${index + 1} الإجابة الصحيحة`}
-                    />
+                    <input className="correct-radio" type="radio" name={`correct-answer-${session.id}`} checked={correctIndex === index} onChange={() => setCorrectIndex(index)} aria-label={`اجعل الخيار ${index + 1} الإجابة الصحيحة`}/>
                     <span className="option-letter">{String.fromCharCode(65 + index)}</span>
-                    <input
-                      className="option-input"
-                      required
-                      maxLength={120}
-                      value={option}
-                      onChange={(event) => updateOption(index, event.target.value)}
-                      placeholder={`الخيار ${index + 1}`}
-                    />
+                    <input className="option-input" required maxLength={120} value={option} onChange={(event) => updateOption(index, event.target.value)} placeholder={`الخيار ${index + 1}`}/>
                     {options.length > 2 && (
-                      <button
-                        className="remove-option"
-                        type="button"
-                        onClick={() => removeOption(index)}
-                        aria-label={`حذف الخيار ${index + 1}`}
-                      >
+                      <button className="remove-option" type="button" onClick={() => removeOption(index)} aria-label={`حذف الخيار ${index + 1}`}>
                         <Minus size={14} />
                       </button>
                     )}
                   </label>
                 ))}
               </div>
-              <button
-                className="add-option-button"
-                type="button"
-                disabled={options.length >= 6}
-                onClick={() => setOptions((current) => [...current, ""])}
-              >
+              <button className="add-option-button" type="button" disabled={options.length >= 6} onClick={() => setOptions((current) => [...current, ""])}>
                 <Plus size={15} /> إضافة اختيار
               </button>
-              <p className="form-hint">اختَر الدائرة بجوار الخيار الصحيح.</p>
-              <button className="button-primary submit-question-button" type="submit">إضافة السؤال</button>
+              <div className="field-label">
+                مدة السؤال (بالثواني)
+                <div className="duration-picker">
+                  {DURATIONS.map((sec) => (
+                    <button
+                      type="button"
+                      key={sec}
+                      className={`duration-chip ${Number(duration) === sec ? "selected" : ""}`}
+                      onClick={() => setDuration(sec)}
+                    >
+                      <b>{sec}</b>
+                      <small>ث</small>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button className="button button-primary submit-question-button" type="submit">إضافة السؤال</button>
             </form>
           ) : (
-            <button className="open-question-form-button" type="button" onClick={() => setFormOpen(true)}>
+            <button className="button open-question-form-button" type="button" onClick={() => setFormOpen(true)}>
               <Plus size={17} /> أضف سؤالًا يدويًا
             </button>
           )}

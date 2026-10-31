@@ -2,7 +2,7 @@ import { Trophy } from 'lucide-react';
 
 export default function Leaderboard({ students = [] }) {
   return (
-    <div className="rounded-div leaderboard-container">
+    <div className="card leaderboard-container">
       <div className="leaderboard-header">
         <div className="title-section">
           <div className="panel-icon leaderboard-icon"><Trophy size={19} /></div>

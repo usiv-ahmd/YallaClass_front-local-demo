@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { CalendarDays, Clock3, X } from 'lucide-react';
 
-export default function CreateSession({ onClose, onSubmit, initialData }) {
+export default function CreateSessionWindow({ onClose, onSubmit, initialData }) {
   const isEditing = !!initialData;
 
   const [title, setTitle] = useState(initialData?.title || '');
@@ -29,8 +29,8 @@ export default function CreateSession({ onClose, onSubmit, initialData }) {
 };
 
   return (
-    <div className="create-session-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <section className="create-session" role="dialog" aria-modal="true" aria-labelledby="create-session-title">
+    <div className="opened-window-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <section className="card create-session" role="dialog" aria-modal="true" aria-labelledby="create-session-title">
         <div className="create-session-heading">
           <div className="create-session-stamp">
             <CalendarDays size={22} />
@@ -39,8 +39,8 @@ export default function CreateSession({ onClose, onSubmit, initialData }) {
             <span className="create-session-kicker">{isEditing ? 'تعديل الجلسة' : 'جلسة جديدة / ٠١'}</span>
             <h2 id="create-session-title">{isEditing ? 'عدّل تفاصيل جلستك' : 'حدّد تفاصيل جلستك'}</h2>
           </div>
-          <button className="create-session-close" type="button" onClick={onClose} aria-label="إغلاق">
-            <X size={19} />
+          <button className="close-button windowed-close-button" type="button" onClick={onClose} aria-label="إغلاق">
+            <X size={17} />
           </button>
         </div>
 
@@ -59,16 +59,16 @@ export default function CreateSession({ onClose, onSubmit, initialData }) {
             <label className="create-session-field">
               التاريخ
               <span className="create-session-field-control">
-                <CalendarDays size={15} />
                 <input type="date" required value={date} onChange={(e) => setDate(e.target.value)} />
+                <CalendarDays size={20} />
               </span>
             </label>
 
             <label className="create-session-field">
               الوقت
               <span className="create-session-field-control">
-                <Clock3 size={15} />
                 <input type="time" required value={time} onChange={(e) => setTime(e.target.value)} />
+                <Clock3 size={20} />
               </span>
             </label>
           </div>
@@ -84,17 +84,17 @@ export default function CreateSession({ onClose, onSubmit, initialData }) {
           </label>
 
           <div className="create-session-actions">
-            <button className="create-session-btn create-session-btn--secondary" type="button" onClick={onClose}>
+            <button className="button create-session-button white-background" type="button" onClick={onClose}>
               إلغاء
             </button>
             
             {!cannotBeDraft && (
-              <button className="create-session-btn create-session-btn--secondary" type="submit" value="draft">
-                حفظ لوقت لاحق
+              <button className="button create-session-button white-background" type="submit" value="draft">
+                حفظ مبدئي
               </button>
             )}
             
-            <button className="create-session-btn create-session-btn--primary" type="submit" value="scheduled">
+            <button className="button create-session-button turquoise-background" type="submit" value="scheduled">
               <CalendarDays size={16} />
               {isEditing ? 'حفظ التعديلات' : 'حفظ الموعد'}
             </button>
