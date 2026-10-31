@@ -5,6 +5,7 @@ import CreateSessionWindow from "./Components/CreateSessionWindow.jsx";
 import DeleteSessionAlert from "./Components/DeleteSessionAlert.jsx";
 import EndLiveSessionAlert from "./Components/EndLiveSessionAlert.jsx";
 import ReopenSessionAlert from "./Components/ReopenSessionAlert.jsx";
+import Leaderboard from "./Components/LeaderBoard.jsx";
 
 import useCreateSession from "./hook/useCreateSession.js";
 import useEditSession from "./hook/useEditSession.js";
@@ -276,27 +277,7 @@ function App() {
 
 
 
-                <section className="card control-card session-card">
-                  <h3><Users size={16} /> المتأخرون ({live.pendingStudents.length})</h3>
-                  {live.pendingStudents.length === 0 ? (
-                    <p className="muted">كل الطلاب خلصوا.</p>
-                  ) : (
-                    <ul className="live-students-list">
-                      {students.map((s) => (
-                        <li
-                          key={s.id}
-                          className={live.isStudentFinished(s) ? "is-done" : "is-pending"}
-                        >
-                          <span className="avatar">{s.name?.[0] ?? "?"}</span>
-                          <span>{s.name}</span>
-                          <small className="live-student-progress">
-                            {live.answeredCountFor(s.id)}/{live.totalQuestions}
-                          </small>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </section>
+                <Leaderboard students={students} >
               </section>
             </div>
           </div>
