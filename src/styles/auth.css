@@ -1,0 +1,111 @@
+.auth-container {
+  max-width: 440px;
+  margin: 60px auto;
+  padding: 28px 24px;
+  background: var(--C-yalla-surface);
+  border: 3px solid var(--C-yalla-border-strong);
+  border-radius: 20px;
+  box-shadow: var(--yalla-shadow);
+  text-align: center;
+}
+
+.auth-container h2 {
+  font-family: var(--font-display);
+  color: var(--C-yalla-highlight);
+  margin-top: 0;
+  margin-bottom: 22px;
+  font-size: 26px;
+}
+
+.role-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.role-selector button {
+  flex: 1;
+  padding: 12px 8px;
+  border-radius: 14px;
+  border: 3px solid var(--C-yalla-border-strong);
+  background: var(--C-yalla-bg);
+  color: var(--C-yalla-fg);
+  font-family: var(--font-display);
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.role-selector button.active {
+  background: var(--C-yalla-highlight);
+  color: var(--C-yalla-bg);
+  transform: scale(1.03);
+}
+
+.auth-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: right;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--C-yalla-text-secondary);
+}
+
+.auth-container input {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 3px solid var(--C-yalla-border-strong);
+  background: var(--C-yalla-bg);
+  color: var(--C-yalla-fg);
+  font-family: var(--font-body);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.auth-container input:focus {
+  border-color: var(--C-yalla-highlight);
+}
+
+.submit-btn {
+  margin-top: 8px;
+  padding: 12px;
+  background: var(--C-yalla-danger);
+  color: var(--C-yalla-fg);
+  font-family: var(--font-display);
+  font-size: 19px;
+  border: 3px solid var(--C-yalla-border-strong);
+  border-radius: 14px;
+  box-shadow: var(--center-shadow);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.submit-btn:active {
+  transform: translateY(5px);
+  box-shadow: none;
+}
+
+.auth-switch {
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--C-yalla-text-secondary);
+}
+
+.auth-switch a {
+  color: var(--C-yalla-highlight);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}

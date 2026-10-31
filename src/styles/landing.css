@@ -1,0 +1,118 @@
+.landing-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 40px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.landing-badge {
+  font-family: var(--font-display);
+  background: var(--C-yalla-surface);
+  color: var(--C-yalla-highlight);
+  border: 3px solid var(--C-yalla-border-strong);
+  border-radius: 12px;
+  padding: 6px 16px;
+  font-size: 15px;
+  box-shadow:var(center-shadow);
+}
+
+.landing-title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5vw, 56px);
+  color: var(--C-yalla-fg);
+  line-height: 1.25;
+  margin: 0;
+  text-shadow:var(center-shadow);
+}
+
+.landing-title span {
+  color: var(--C-yalla-danger);
+  display: inline-block;
+}
+
+.landing-subtitle {
+  font-family: var(--font-body);
+  font-size: clamp(16px, 2.5vw, 20px);
+  color: var(--C-yalla-text-secondary);
+  max-width: 650px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.landing-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.landing-card {
+  background: var(--C-yalla-surface);
+  border: 3px solid var(--C-yalla-border-strong);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: var(--yalla-shadow);
+  text-align: right;
+  transition: transform 0.2s;
+}
+
+.landing-card:hover {
+  transform: translateY(-4px);
+}
+
+.landing-card-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+.landing-card h3 {
+  font-family: var(--font-display);
+  color: var(--C-yalla-highlight);
+  margin: 0 0 8px 0;
+  font-size: 22px;
+}
+
+.landing-card p {
+  color: var(--C-yalla-text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.auth-pages {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.btn-primary, .btn-secondary {
+  font-family: var(--font-display);
+  font-size: 20px;
+  padding: 12px 32px;
+  border-radius: 16px;
+  border: 3px solid var(--C-yalla-border-strong);
+  box-shadow: var(--center-shadow);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.btn-primary {
+  background: var(--C-yalla-danger);
+  color: var(--C-yalla-fg);
+}
+
+.btn-secondary {
+  background: var(--C-yalla-highlight);
+  color: var(--C-yalla-bg);
+}
+
+.btn-primary:active, .btn-secondary:active {
+  transform: translateY(6px);
+  box-shadow: none;
+}
