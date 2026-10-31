@@ -277,7 +277,7 @@ function App() {
                 </section>
 
 
-                <Attendanceboard students={students} expectedCount={session.studentnumber} />
+                <Attendanceboard students={students} expectedCount={live.liveSession?.studentnumber} />
                 <Leaderboard students={students} />
               </section>
             </div>
