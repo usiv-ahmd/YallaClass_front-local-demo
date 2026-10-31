@@ -277,7 +277,7 @@ function App() {
 
 
 
-                <Leaderboard students={students} >
+                <Leaderboard students={students} />
               </section>
             </div>
           </div>
