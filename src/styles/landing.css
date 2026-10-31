@@ -61,10 +61,6 @@
   transition: transform 0.2s;
 }
 
-.landing-card:hover {
-  transform: translateY(-4px);
-}
-
 .landing-card-icon {
   font-size: 36px;
   margin-bottom: 12px;

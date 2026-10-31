@@ -25,7 +25,7 @@ export default function Login() {
   };
 
   return (
-    <div className="auth-container">
+    <div className="card auth-container">
       <h2>تسجيل الدخول</h2>
 
       <div className="role-selector">

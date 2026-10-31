@@ -15,13 +15,13 @@ export default function LandingPage() {
       </p>
 
       <div className="landing-cards">
-        <div className="landing-card">
+        <div className="card landing-card">
           <div className="landing-card-icon">👨‍🏫</div>
           <h3>لوحة المحاضر</h3>
           <p>عرض الأسئلة والعدادات والتنافس المباشر للطلاب مع تحكم كامل وإحصائيات للحصة.</p>
         </div>
 
-        <div className="landing-card">
+        <div className="card landing-card">
           <div className="landing-card-icon">🎓</div>
           <h3>واجهة الطالب</h3>
           <p>إجابة سريعة، جمع نقاط السلسلة (Streak)، وفتح صناديق الهدايا والمفاجآت.</p>

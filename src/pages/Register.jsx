@@ -32,7 +32,7 @@ export default function Register() {
   };
 
   return (
-    <div className="auth-container">
+    <div className="card auth-container">
       <h2>إنشاء حساب جديد</h2>
 
       <div className="role-selector">
