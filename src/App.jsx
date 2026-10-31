@@ -277,7 +277,7 @@ function App() {
                 </section>
 
 
-                <Attendanceboard students={students} expectedCount={selectedSession.studentnumber} />
+                <Attendanceboard students={students} expectedCount={session.studentnumber} />
                 <Leaderboard students={students} />
               </section>
             </div>
