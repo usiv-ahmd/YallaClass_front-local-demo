@@ -5,6 +5,7 @@ import CreateSessionWindow from "./Components/CreateSessionWindow.jsx";
 import DeleteSessionAlert from "./Components/DeleteSessionAlert.jsx";
 import EndLiveSessionAlert from "./Components/EndLiveSessionAlert.jsx";
 import ReopenSessionAlert from "./Components/ReopenSessionAlert.jsx";
+import Attendanceboard from "./Components/AttendanceBoard.jsx";
 import Leaderboard from "./Components/LeaderBoard.jsx";
 
 import useCreateSession from "./hook/useCreateSession.js";
@@ -276,7 +277,7 @@ function App() {
                 </section>
 
 
-
+                <Attendanceboard students={students} expectedCount={selectedSession.studentnumber} />
                 <Leaderboard students={students} />
               </section>
             </div>
