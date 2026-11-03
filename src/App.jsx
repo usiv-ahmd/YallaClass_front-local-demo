@@ -2,10 +2,10 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import InstructorView from './pages/InstructorView';
-import StudentView from './pages/StudentView';
+import InstructorView from './pages/InstructorView.jsx';
+import StudentView from './pages/StudentView.jsx';
 
-import Loading from './Components/loading';
+import Loading from './Components/Loading.jsx';
 
 function App() {
   return (
