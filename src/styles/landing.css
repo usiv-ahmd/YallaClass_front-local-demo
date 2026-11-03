@@ -30,7 +30,6 @@
 }
 
 .landing-title span {
-  font-family: var(--font-display);
   color: var(--C-yalla-danger);
   display: inline-block;
 }

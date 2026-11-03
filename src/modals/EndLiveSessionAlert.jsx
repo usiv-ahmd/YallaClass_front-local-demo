@@ -12,7 +12,7 @@ export default function EndLiveSessionAlert({ onClose, onConfirm, sessionCode })
 
           <div>
             <span className="End-live-kicker">تأكيد الإنهاء / خطوة أخيرة</span>
-            <h2 id="end-session-title">إنهاء الحصة</h2>
+            <h2 className="end-session-title">إنهاء الحصة</h2>
           </div>
 
           <button className="close-button windowed-close-button" type="button" onClick={onClose} aria-label="إغلاق">

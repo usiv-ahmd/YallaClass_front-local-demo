@@ -37,7 +37,7 @@ export default function CreateSessionWindow({ onClose, onSubmit, initialData }) 
           </div>
           <div>
             <span className="create-session-kicker">{isEditing ? 'تعديل الجلسة' : 'جلسة جديدة / ٠١'}</span>
-            <h2 id="create-session-title">{isEditing ? 'عدّل تفاصيل جلستك' : 'حدّد تفاصيل جلستك'}</h2>
+            <h2 className="create-session-title">{isEditing ? 'عدّل تفاصيل جلستك' : 'حدّد تفاصيل جلستك'}</h2>
           </div>
           <button className="close-button windowed-close-button" type="button" onClick={onClose} aria-label="إغلاق">
             <X size={17} />

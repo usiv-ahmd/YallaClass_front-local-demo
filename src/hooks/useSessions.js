@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 
 export function useSessions(initialSessions = []) {
   const [sessionsList, setSessionsList] = useState(initialSessions);
-  const [selectedId, setSelectedId]     = useState(initialSessions[0]?.id ?? null);
+  const [selectedId, setSelectedId]     = useState(null);
   const [search, setSearch]             = useState("");
   const [filterTab, setFilterTab]       = useState("all");
   const [isUploading, setIsUploading]   = useState(false);

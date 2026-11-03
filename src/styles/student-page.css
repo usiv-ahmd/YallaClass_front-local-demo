@@ -1,0 +1,14 @@
+.student-layout {
+  display: flex;
+  gap: clamp(16px, 2.4vw, 28px);
+  align-items: flex-start;
+  width: 100%;
+}
+
+.student-sidebar {
+  position: sticky;
+  top: 24px;
+  flex: 0 0 450px;
+  width: 450px;
+  max-width: 100%;
+}

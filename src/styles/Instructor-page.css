@@ -13,8 +13,7 @@
   background: var(--C-yalla-danger-hover);
 }
 
-.delete-session-button:hover,
-.delete-question-button:hover,
+.delete-session-button:hover, .delete-question-button:hover,
 .remove-option:hover {
   background: var(--C-yalla-danger-Sdark-hover);
 }
@@ -70,235 +69,9 @@
   }
 }
 
-@media (max-width: 980px) {
-  .instructor-dashboard {
-    grid-template-columns: 1fr;
-  }
-
-  .instructor-sidebar {
-    position: static;
-  }
-
-  .sessions-cards-container {
-    max-height: none;
-  }
-
-  .live-stage-grid { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 760px) {
-  .heading-meta {
-    justify-content: flex-start;
-  }
-
-  .selected-session-top {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .selected-session-actions {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .launch-session-button {
-    flex: 1 1 auto;
-  }
-
-  .session-meta-row {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  }
-
-  .session-workspace .questions,
-  .session-workspace .boards {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 520px) {
-  .heading-meta {
-    width: 100%;
-    gap: 8px;
-  }
-
-  .today-card,
-  .Heading-create-button {
-    flex: 1 1 auto;
-    justify-content: center;
-  }
-
-  .Heading-create-button {
-    padding-inline: 14px;
-  }
-
-  .answer-options-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .open-question-form-button,
-  .submit-question-button {
-    width: 100%;
-    align-self: stretch;
-  }
-
-  .panel-heading {
-    align-items: flex-start;
-  }
-
-  .instructor-page {
-    padding: 14px;
-  }
-
-  .instructor-page-heading {
-    display: block;
-  }
-
-  .page-heading h1 {
-    font-size: clamp(1.8rem, 9vw, 2.6rem);
-  }
-
-  .sessions-filter-tabs {
-    gap: 6px;
-  }
-
-  .filter-button {
-    flex: 1 1 100%;
-  }
-
-  .leaderboard-row {
-    grid-template-columns: 40px minmax(80px, 1fr) minmax(60px, 1fr) minmax(80px, 1fr);
-    padding: 8px 10px;
-  }
-
-  .session-meta-row {
-    grid-template-columns: 1fr;
-  }
-
-  .overview-status {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .selected-session-actions {
-    flex-wrap: wrap;
-  }
-
-  .icon-button, .close-button {
-    flex: 0 0 auto;
-  }
-
-  .attendance-row {
-    grid-template-columns: minmax(80px, 2fr) repeat(4, minmax(40px, 1fr));
-    padding: 8px 10px;
-    gap: 6px;
-  }
-
-  .attendance-row--head {
-    font-size: 0.7rem;
-  }
-
-  .attendance-row .col-name {
-    font-size: 0.85rem;
-  }
-
-  .check {
-    width: 22px;
-    height: 22px;
-    font-size: 0.7rem;
-  }
-
-  .col-score,
-  .col-streak {
-    font-size: 0.85rem;
-  }
-
-  .create-session {
-    padding: 20px;
-  }
-
-  .create-session-fields-row {
-    grid-template-columns: 1fr;
-  }
-
-  .create-session-actions, .delete-session-actions, .end-live-actions {
-    flex-direction: column-reverse;
-  }
-}
-
-/* =========================================
-  Page Shell
-  ========================================= */
-
-.instructor-page {
-  min-height: 100vh;
-  padding: clamp(16px, 3vw, 32px);
-  font-weight: 600;
-  line-height: 1.7;
-}
-
-.instructor-page *,
-.instructor-page *::before,
-.instructor-page *::after {
-  box-sizing: border-box;
-}
-
 /* =========================================
   Page Heading
   ========================================= */
-
-.instructor-page-heading-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 20px;
-  padding: 24px 28px;
-  margin-bottom: clamp(18px, 3vw, 28px);
-}
-
-.page-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--C-yalla-surface);
-  color: var(--C-yalla-highlight);
-  font-size: 14px;
-  border: 2px solid var(--C-yalla-border-strong);
-  border-radius: 10px;
-  padding: 4px 12px;
-  margin-bottom: 10px;
-}
-
-.eyebrow-star {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--C-yalla-danger);
-  line-height: 0;
-}
-
-.page-heading h1 {
-  margin: 14px 0 8px;
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 4.2vw, 3.35rem);
-  font-weight: 700;
-  line-height: 1.15;
-  color: var(--white);
-}
-
-.page-heading h1 em {
-  font-family: var(--font-display);
-  font-style: normal;
-  color: var(--C-yalla-danger);
-}
-
-.page-heading p {
-  max-width: 720px;
-  margin: 0;
-  color: var(--C-yalla-text-secondary);
-  font-size: clamp(0.92rem, 1.4vw, 1.05rem);
-  font-weight: 600;
-}
 
 .heading-meta {
   display: flex;
@@ -310,7 +83,7 @@
   align-self: stretch;
 }
 
-.today-card {
+.today-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -327,12 +100,12 @@
   line-height: 1.3;
 }
 
-.today-card svg {
+.today-chip svg {
   flex: 0 0 auto;
   color: var(--C-yalla-primary-strong);
 }
 
-.today-card span {
+.today-chip span {
   min-width: 0;
 }
 
@@ -342,23 +115,6 @@
   background: var(--C-yalla-danger);
   color: var(--C-yalla-fg);
   white-space: nowrap;
-}
-
-/* =========================================
-  Dashboard
-  ========================================= */
-
-.instructor-dashboard {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(16px, 2.4vw, 28px);
-  align-items: stretch;
-  width: 100%;
-}
-
-.instructor-dashboard > * {
-  min-width: 0;
-  width: 100%;
 }
 
 /* =========================================
@@ -378,15 +134,19 @@
   flex: 0 0 450px;
   width: 450px;
   max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  gap: clamp(14px, 2vw, 20px);
 }
 
 .session-workspace, .live-workspace {
-  flex: 1 1 auto;
-  min-width: 0;
-  width: 100%;
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   gap: clamp(14px, 2vw, 20px);
+  min-width: 0;
+  width: 100%;
 }
 
 .session-workspace .questions,
@@ -395,10 +155,6 @@
   grid-template-columns: minmax(0, 1.08fr) minmax(270px, .92fr);
   gap: 27px;
   width: 100%;
-}
-
-.session-card {
-  padding: 16px;
 }
 
 /* =========================================
@@ -410,7 +166,6 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 14px;
 }
 
 .sidebar-title-row {
@@ -743,8 +498,9 @@
   gap: 10px;
   padding: 40px 24px;
   min-height: 260px;
+  width: 100%;
 }
-
+ 
 .no-session-icon {
   display: inline-flex;
   align-items: center;
@@ -787,10 +543,9 @@
   Selected Session Header
   ========================================= */
 
-.selected-session-header {
+.selected-session-header-card {
   display: flex;
   flex-direction: column;
-  padding: 18px 20px;
 }
 
 .selected-session-top {
@@ -1006,13 +761,6 @@
   Material Upload Card
   ========================================= */
 
-.material-upload-card {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 18px 20px;
-}
-
 .card-heading-row {
   display: flex;
   align-items: center;
@@ -1110,18 +858,18 @@
   outline-offset: 3px;
 }
 
-.attached-file-badge {
+.attached-file-field {
   display: inline-flex;
-  align-items: center;
+  flex-direction: row;
   flex-wrap: wrap;
-  gap: 6px;
+  align-items: center;
   align-self: flex-start;
-  max-width: 100%;
+  gap: 6px;
   padding: 8px 12px;
-  border: 2px solid var(--C-yalla-border-strong);
-  border-radius: 999px;
-  background: rgba(15, 181, 166, 0.12);
+  background: #0fb5a61f;
   color: var(--C-yalla-text-secondary);
+  border: 2px solid var(--C-yalla-border-strong);
+  border-radius: var(--yalla-radius);
   font-size: 0.78rem;
   font-weight: 700;
   line-height: 1.3;
@@ -1177,11 +925,8 @@
   Questions Panel
   ========================================= */
 
-.questions-panel {
-  display: flex;
-  flex-direction: column;
+.questions-container, .material-upload-card {
   gap: 14px;
-  padding: 18px 20px;
 }
 
 .panel-heading {
@@ -1265,17 +1010,11 @@
   grid-template-columns: repeat(3, 1fr);
 }
 
-.question-card {
-  display: flex;
-  flex-direction: column;
+.question-field {
   gap: 10px;
-  padding: 14px 16px;
-  border: 2px solid rgba(2, 9, 13, 0.6);
-  border-radius: var(--yalla-radius);
-  background: rgba(255, 255, 255, 0.03);
 }
 
-.question-card-topline {
+.question-field-topline {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1350,6 +1089,31 @@
   white-space: nowrap;
 }
 
+.question-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-inline-start: auto;
+}
+
+.edit-question-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-inline-start: auto;
+  padding: 0;
+  background: transparent;
+  border: 2px solid var(--C-yalla-border-strong);
+  border-radius: 8px;
+  color: var(--C-yalla-turquoise, #14b8a6);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.edit-question-button:hover {
+  background: rgba(20, 184, 166, 0.1);
+}
 .delete-question-button {
   display: inline-flex;
   align-items: center;
@@ -1363,7 +1127,7 @@
   color: var(--C-yalla-danger);
 }
 
-.question-card h3 {
+.question-field h3 {
   margin: 0;
   color: var(--C-yalla-fg);
   font-size: 0.95rem;
@@ -1467,24 +1231,6 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 16px;
-  border: 2px solid var(--C-yalla-border-strong);
-  border-radius: var(--yalla-radius);
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.form-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.form-heading strong {
-  color: var(--C-yalla-fg);
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 700;
 }
 
 .field-label {
@@ -1738,12 +1484,6 @@
 /* =========================================
   Shared Table Styles (Base for both)
   ========================================= */
-.leaderboard-container,
-.attendance-container {
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-}
 
 .leaderboard-header,
 .attendance-header {
@@ -1975,7 +1715,7 @@
   backdrop-filter: blur(4px);
 }
 
-.create-session, .delete-session, .End-live, .reopen {
+.create-session, .delete-session, .End-live, .reopen, .question-form-window {
   width: 100%;
   max-width: 540px;
   max-height: 90vh;
@@ -1986,14 +1726,14 @@
   position: relative;
 }
 
-.create-session-heading, .delete-session-heading, .End-live-heading, .reopen-heading {
+.create-session-heading, .delete-session-heading, .End-live-heading, .reopen-heading, .form-heading {
   display: flex;
   align-items: flex-start;
   gap: 16px;
   position: relative;
 }
 
-.create-session-stamp, .delete-session-stamp, .End-live-stamp, .reopen-stamp {
+.create-session-stamp, .delete-session-stamp, .End-live-stamp, .reopen-stamp, .question-field-stamp {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2018,9 +1758,15 @@
   font-size: 0.75rem;
   font-weight: 700;
 }
+.create-session-heading div, .delete-session-heading div, .End-live-heading div, .reopen-heading div, .form-heading div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 
-.create-session-heading h2, .create-session-heading h2, .create-session-heading h2 {
+.create-session-heading div h2, .delete-session-heading div h2, .End-live-heading div h2, .reopen-heading div h2, .form-heading div h2 {
   margin: 0;
+  justify-content: center;
   color: var(--C-yalla-fg);
   font-family: var(--font-display);
   font-size: clamp(1.2rem, 3vw, 1.5rem);
@@ -2114,13 +1860,13 @@
   
 }
 
-.create-session-actions, .delete-session-actions, .end-live-actions {
+.create-session-actions, .delete-session-actions, .end-live-actions, .question-form-actions {
   display: flex;
   gap: 12px;
   margin-top: 8px;
 }
 
-.create-session-button, .delete-session-actions .delete-session-button, .end-live-button, .ReopenSession-button {
+.create-session-button, .delete-session-actions .delete-session-button, .end-live-button, .ReopenSession-button, .question-form-button {
   flex: 1;
   display: inline-flex;
   align-items: center;
@@ -2188,12 +1934,12 @@
   color: var(--C-yalla-primary);
 }
 
-.live-question-card {
+.live-question-field {
   width: 100%;
   position: relative;
   overflow: hidden;
 }
-.live-question-card-content::before {
+.live-question-field-content::before {
   content: '';
   position: absolute;
   top: -50px;
@@ -2290,13 +2036,7 @@
   align-items: stretch;
 }
 
-.live-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.live-controls > .card { padding: 16px; }
-.live-controls h3 {
+.live-controls-h3 {
   display: flex;
   align-items: center;
   gap: 6px;

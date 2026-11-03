@@ -20,17 +20,24 @@ export default function useQuestionsForm(session) {
   const [options, setOptions]           = useState(["", "", "", ""]);
   const [correctIndex, setCorrectIndex] = useState(0);
   const [duration, setDuration]         = useState(30);
+  const [editingId, setEditingId]       = useState(null); // ← جديد
 
   const selectedIdRef = useRef(session?.selectedId);
+
+  // helper: تصفير الفورم بالكامل
+  function resetForm() {
+    setFormOpen(false);
+    setEditingId(null);
+    setText("");
+    setOptions(["", "", "", ""]);
+    setCorrectIndex(0);
+    setDuration(30);
+  }
 
   useEffect(() => {
     if (selectedIdRef.current !== session?.selectedId) {
       selectedIdRef.current = session?.selectedId;
-      setFormOpen(false);
-      setText("");
-      setOptions(["", "", "", ""]);
-      setCorrectIndex(0);
-      setDuration(30);
+      resetForm();
     }
   }, [session?.selectedId]);
 
@@ -44,7 +51,27 @@ export default function useQuestionsForm(session) {
   const commit = (nextQuestions) =>
     session.updateQuestions(session.selectedId, nextQuestions);
 
-  // ── Add ────────────────────────────────────────
+  // ── فتح الفورم لإضافة سؤال جديد ────────────────────
+  function startAdd() {
+    resetForm();
+    setFormOpen(true);
+  }
+
+  // ── فتح الفورم لتعديل سؤال موجود ────────────────────
+  function startEdit(question) {
+    if (!question) return;
+    setEditingId(question.id);
+    setText(question.question ?? question.text ?? "");
+    const opts = Array.isArray(question.options) && question.options.length >= 2
+      ? [...question.options]
+      : ["", ""];
+    setOptions(opts);
+    setCorrectIndex(Math.max(0, getCorrectIndex(question)));
+    setDuration(Number(question.duration) || 30);
+    setFormOpen(true);
+  }
+
+  // ── Submit: إضافة أو تعديل حسب editingId ──────────────
   function addQuestion(event) {
     event.preventDefault();
 
@@ -65,28 +92,43 @@ export default function useQuestionsForm(session) {
 
     const safeDuration = Math.min(120, Math.max(5, Number(duration) || 30));
 
-    const newQuestion = {
-      id: makeId("question"),
-      question: text.trim(),
-      text: text.trim(),
-      options: trimmedOptions,
-      correctOptionIndex: correctIndex,
-      correctAnswer: trimmedOptions[correctIndex],
-      duration: safeDuration,
-      source: "manual",
-      type: "mcq",
-    };
+    if (editingId) {
+      // 🔄 وضع التعديل
+      commit(
+        questions.map((q) =>
+          q.id === editingId
+            ? {
+                ...q,
+                question: text.trim(),
+                text: text.trim(),
+                options: trimmedOptions,
+                correctOptionIndex: correctIndex,
+                correctAnswer: trimmedOptions[correctIndex],
+                duration: safeDuration,
+              }
+            : q
+        )
+      );
+    } else {
+      // ➕ وضع الإضافة
+      const newQuestion = {
+        id: makeId("question"),
+        question: text.trim(),
+        text: text.trim(),
+        options: trimmedOptions,
+        correctOptionIndex: correctIndex,
+        correctAnswer: trimmedOptions[correctIndex],
+        duration: safeDuration,
+        source: "manual",
+        type: "mcq",
+      };
+      commit([...questions, newQuestion]);
+    }
 
-    commit([...questions, newQuestion]);
-
-    setText("");
-    setOptions(["", "", "", ""]);
-    setCorrectIndex(0);
-    setDuration(30);
-    setFormOpen(false);
+    resetForm();
   }
 
-  // ── Options ────────────────────────────────────
+  // ── Options ────────────────────────────────────────
   function updateOption(index, value) {
     setOptions((current) =>
       current.map((option, optionIndex) => (optionIndex === index ? value : option))
@@ -100,9 +142,10 @@ export default function useQuestionsForm(session) {
     );
   }
 
-  // ── Delete a saved question ────────────────────
+  // ── Delete ─────────────────────────────────────────
   function deleteQuestion(questionId) {
     commit(questions.filter((item) => item.id !== questionId));
+    if (editingId === questionId) resetForm();
   }
 
   return {
@@ -117,5 +160,10 @@ export default function useQuestionsForm(session) {
     updateOption,
     removeOption,
     deleteQuestion,
+
+    editingId,
+    startAdd,
+    startEdit,
+    cancelForm: resetForm,
   };
 }

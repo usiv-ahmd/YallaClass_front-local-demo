@@ -12,7 +12,7 @@ export default function DeleteSessionAlert({ onClose, onConfirm, sessionTitle })
 
           <div>
             <span className="delete-session-kicker">تأكيد الحذف / خطوة أخيرة</span>
-            <h2 id="delete-session-title">حذف الحصة</h2>
+            <h2 className="delete-session-title">حذف الحصة</h2>
           </div>
 
           <button className="close-button windowed-close-button" type="button" onClick={onClose} aria-label="إغلاق">
