@@ -93,6 +93,7 @@ export const initialMockData = {
         },
       ],
       students: [
+        {id: 1,  name: "أحمد محمود",     correctAnswers: 10, wrongAnswers: 0, attended: true,  interacted: true,  score: 950, highestStreak: 20 },
         { id: 14, name: "نور الدين",     correctAnswers: 10, wrongAnswers: 0, attended: true,  interacted: true,  score: 950, highestStreak: 20 },
         { id: 11, name: "يوسف محمد",     correctAnswers: 9,  wrongAnswers: 2, attended: true,  interacted: true,  score: 850, highestStreak: 12 },
         { id: 12, name: "مجدي سامي",     correctAnswers: 7,  wrongAnswers: 4, attended: true,  interacted: false, score: 780, highestStreak: 9  },

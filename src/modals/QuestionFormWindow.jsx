@@ -6,23 +6,21 @@ export default function QuestionFormWindow({ question, sessionId }) {
 
   return (
     <div className="opened-window-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) question.cancelForm(); }}>
-      <section className="card question-form-window" role="dialog" aria-modal="true" aria-labelledby="question-form-title">
-        <div className="form-heading">
-          <div className="question-field-stamp">
-            {isEditing ? <FilePen size={22} /> : <FilePlus size={22} />}
+      <section className="card modal-window" role="dialog" aria-modal="true" aria-labelledby="question-form-title">
+        <div className="card-heading">
+          <div className="card-heading-title">
+            <div className="card-icon turquoise">{isEditing ? <FilePen size={22} /> : <FilePlus size={22} />}</div>
+            <div>
+              <span className="card-kicker">{isEditing ? 'سؤال جديد / إضافة يدوية' : 'تعديل السؤال / تحديث المحتوى'}</span>
+              <h2 className="modal-title">{isEditing ? "تعديل السؤال" : "سؤال جديد"}</h2>
+            </div>
           </div>
-
-          <div>
-            <span className="create-session-kicker">{isEditing ? 'سؤال جديد / إضافة يدوية' : 'تعديل السؤال / تحديث المحتوى'}</span>
-            <h2 className="question-form-title">{isEditing ? "تعديل السؤال" : "سؤال جديد"}</h2>
-          </div>
-
-          <button className="close-button windowed-close-button" type="button" onClick={question.cancelForm} aria-label="إغلاق">
+          <button className="modal-close-button" type="button" onClick={question.cancelForm} aria-label="إغلاق">
             <X size={17} />
           </button>
         </div>
 
-        <form className="question-form" onSubmit={question.addQuestion}>
+        <form className="modal-content" onSubmit={question.addQuestion}>
           <label className="field-label">
             نص السؤال
             <textarea
@@ -102,11 +100,11 @@ export default function QuestionFormWindow({ question, sessionId }) {
             </div>
           </div>
 
-          <div className="question-form-actions">
-            <button className="button question-form-button button-ghost" type="button" onClick={question.cancelForm}>
+          <div className="modal-actions">
+            <button className="button modal-button ghost" type="button" onClick={question.cancelForm}>
               إلغاء
             </button>
-            <button className="button question-form-button button-primary" type="submit">
+            <button className="button modal-button turquoise" type="submit">
               {isEditing ? "حفظ التعديلات" : "إضافة السؤال"}
             </button>
           </div>

@@ -30,21 +30,21 @@ export default function CreateSessionWindow({ onClose, onSubmit, initialData }) 
 
   return (
     <div className="opened-window-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <section className="card create-session" role="dialog" aria-modal="true" aria-labelledby="create-session-title">
-        <div className="create-session-heading">
-          <div className="create-session-stamp">
-            <CalendarDays size={22} />
+      <section className="card modal-window" role="dialog" aria-modal="true" aria-labelledby="create-session-title">
+        <div className="card-heading">
+          <div className="card-heading-title">
+            <div className="card-icon turquoise"><CalendarDays size={22} /></div>
+            <div>
+              <span className="card-kicker">{isEditing ? 'تعديل الجلسة' : 'جلسة جديدة / ٠١'}</span>
+              <h2 className="modal-title">{isEditing ? 'عدّل تفاصيل جلستك' : 'حدّد تفاصيل جلستك'}</h2>
+            </div>
           </div>
-          <div>
-            <span className="create-session-kicker">{isEditing ? 'تعديل الجلسة' : 'جلسة جديدة / ٠١'}</span>
-            <h2 className="create-session-title">{isEditing ? 'عدّل تفاصيل جلستك' : 'حدّد تفاصيل جلستك'}</h2>
-          </div>
-          <button className="close-button windowed-close-button" type="button" onClick={onClose} aria-label="إغلاق">
+          <button className="modal-close-button" type="button" onClick={onClose} aria-label="إغلاق">
             <X size={17} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="create-session-form">
+        <form className="modal-content" onSubmit={handleSubmit}>
           <label className="create-session-field">
             اسم الجلسة
             <input autoFocus required maxLength={80} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="مثال: مراجعة قوانين الحركة" />
@@ -83,18 +83,18 @@ export default function CreateSessionWindow({ onClose, onSubmit, initialData }) 
             </select>
           </label>
 
-          <div className="create-session-actions">
-            <button className="button create-session-button white-background" type="button" onClick={onClose}>
+          <div className="modal-actions">
+            <button className="button modal-button white" type="button" onClick={onClose}>
               إلغاء
             </button>
             
             {!cannotBeDraft && (
-              <button className="button create-session-button white-background" type="submit" value="draft">
+              <button className="button modal-button white" type="submit" value="draft">
                 حفظ مبدئي
               </button>
             )}
             
-            <button className="button create-session-button turquoise-background" type="submit" value="scheduled">
+            <button className="button modal-button turquoise" type="submit" value="scheduled">
               <CalendarDays size={16} />
               {isEditing ? 'حفظ التعديلات' : 'حفظ الموعد'}
             </button>

@@ -29,12 +29,12 @@ function Attendanceboard({ students = [], expectedCount }) {
 
   return (
     <div className="card">
-      <div className="attendance-header">
-        <div className="title-section">
-          <div className="panel-icon attendance-icon"><ClipboardList size={19} /></div>
+      <div className="card-heading">
+        <div className="card-heading-title">
+          <div className="card-icon small-card-icon blue"><ClipboardList size={19} /></div>
           <h2 className="attendance-title">الحضور والتفاعل</h2>
         </div>
-        <span className="attendance-count">
+        <span className="count-pill">
           {attendedCount} / {expectedCount}
         </span>
       </div>
@@ -72,10 +72,10 @@ function Attendanceboard({ students = [], expectedCount }) {
 function Leaderboard({ students = [] }) {
   return (
     <div className="card">
-      <div className="leaderboard-header">
-        <div className="title-section">
-          <div className="panel-icon leaderboard-icon"><Trophy size={19} /></div>
-          <h2 className="leaderboard-title">لوحة المتصدرين</h2>
+      <div className="card-heading">
+        <div className="card-heading-title">
+          <div className="card-icon small-card-icon yellow"><Trophy size={19} /></div>
+          <h2>لوحة المتصدرين</h2>
         </div>
       </div>
 
@@ -151,7 +151,7 @@ function InstructorView() {
             </div>
 
             <div className="heading-meta">
-              <button className="button button-primary Heading-create-button" type="button" onClick={live.requestEndLive}>
+              <button className="button button-primary red" type="button" onClick={live.requestEndLive}>
                 إنهاء الجلسة والعودة
               </button>
               <div className="session-status">
@@ -191,17 +191,17 @@ function InstructorView() {
                   <div className="live-controls-buttons">
 
                     {live.liveState === "lobby" && (
-                      <button className="button button-primary" onClick={live.startCountdown}>
+                      <button className="button button-primary turquoise" onClick={live.startCountdown}>
                         <Play size={16} /> ابدأ الجلسة
                       </button>
                     )}
 
                     {live.liveState === "countdown" && (
                       <>
-                        <button className="button button-primary" onClick={live.startQuestion}>
+                        <button className="button button-primary turquoise" onClick={live.startQuestion}>
                           <SkipForward size={16} /> ابدأ السؤال دلوقتي
                         </button>
-                        <button className="button button-ghost" onClick={live.cancelCountdown}>
+                        <button className="button ghost" onClick={live.cancelCountdown}>
                           <X size={16} /> إلغاء
                         </button>
                       </>
@@ -209,10 +209,10 @@ function InstructorView() {
 
                     {live.liveState === "question" && (
                       <>
-                        <button className="button button-ghost" onClick={live.pauseQuestion}>
+                        <button className="button ghost" onClick={live.pauseQuestion}>
                           <Pause size={16} /> إيقاف مؤقت
                         </button>
-                        <button className="button button-primary" onClick={live.revealAnswer}>
+                        <button className="button button-primary turquoise" onClick={live.revealAnswer}>
                           <Eye size={16} /> اعرض الإجابة
                         </button>
                       </>
@@ -220,13 +220,13 @@ function InstructorView() {
 
                     {live.liveState === "paused" && (
                       <>
-                        <button className="button button-primary" onClick={live.resumeQuestion}>
+                        <button className="button button-primary turquoise" onClick={live.resumeQuestion}>
                           <Play size={16} /> استكمال
                         </button>
-                        <button className="button button-ghost" onClick={live.revealAnswer}>
+                        <button className="button ghost" onClick={live.revealAnswer}>
                           <Eye size={16} /> اعرض الإجابة
                         </button>
-                        <button className="button Heading-create-button" onClick={live.finishSession}>
+                        <button className="button red" onClick={live.finishSession}>
                           <LogOut size={16} /> أنهِ الجولة
                         </button>
                       </>
@@ -234,11 +234,11 @@ function InstructorView() {
 
                     {live.liveState === "reveal" && (
                       !live.isLastQuestion ? (
-                        <button className="button button-primary" onClick={live.nextQuestion}>
+                        <button className="button button-primary turquoise" onClick={live.nextQuestion}>
                           <SkipForward size={16} /> السؤال التالي
                         </button>
                       ) : (
-                        <button className="button button-primary" onClick={live.finishSession}>
+                        <button className="button button-primary turquoise" onClick={live.finishSession}>
                           <Check size={16} /> أنهِ الجولة
                         </button>
                       )
@@ -246,10 +246,10 @@ function InstructorView() {
 
                     {live.liveState === "finished" && (
                       <>
-                        <button className="button button-primary" type="button" onClick={reopenModal.open} disabled={live.pendingStudents.length === 0} title={live.pendingStudents.length === 0 ? "كل الطلاب خلصوا" : "افتح الجولة للمتأخرين بس"}>
+                        <button className="button button-primary turquoise" type="button" onClick={reopenModal.open} disabled={live.pendingStudents.length === 0} title={live.pendingStudents.length === 0 ? "كل الطلاب خلصوا" : "افتح الجولة للمتأخرين بس"}>
                           <RotateCcw size={16} /> افتح للمتأخرين ({live.pendingStudents.length})
                         </button>
-                        <button className="button button-ghost" type="button" onClick={live.requestEndLive}>
+                        <button className="button ghost" type="button" onClick={live.requestEndLive}>
                           <LogOut size={16} /> خروج وإغلاق الجلسة
                         </button>
                       </>
@@ -257,10 +257,10 @@ function InstructorView() {
 
                     {live.liveState === "reopened" && (
                       <>
-                        <button className="button button-primary" type="button" onClick={live.closeReopenedRound}>
+                        <button className="button button-primary turquoise" type="button" onClick={live.closeReopenedRound}>
                           <Lock size={16} /> اقفل الجولة
                         </button>
-                        <button className="button button-ghost" type="button" onClick={live.requestEndLive}>
+                        <button className="button ghost" type="button" onClick={live.requestEndLive}>
                           <LogOut size={16} /> خروج
                         </button>
                       </>
@@ -395,7 +395,7 @@ function InstructorView() {
                             : "كل الطلاب خلصوا — تقدر تقفل الجلسة."}
                         </p>
                         {live.pendingStudents.length > 0 && (
-                          <button type="button" className="button button-primary" onClick={reopenModal.open}>
+                          <button type="button" className="button button-primary turquoise" onClick={reopenModal.open}>
                             <RotateCcw size={16} /> افتح للمتأخرين ({live.pendingStudents.length})
                           </button>
                         )}
@@ -460,7 +460,7 @@ function InstructorView() {
             <p>اختر حصة لتحديث محتواها، رفع الماتريال، ومتابعة أداء الطلاب.</p>
           </div>
           <div className="heading-meta">
-            <button className="button button-primary Heading-create-button" type="button" onClick={createModal.open}>
+            <button className="button button-primary red" type="button" onClick={createModal.open}>
               <Plus size={17} /> حصة جديدة
             </button>
             <div className="chip today-chip">
@@ -473,12 +473,14 @@ function InstructorView() {
           <div className="instructor-layout">
             <aside className="instructor-sidebar">
               <section className="card sidebar-card">
-                <div className="sessions-sidebar-header">
-                  <div className="sidebar-title-row">
-                    <span className="sidebar-eyebrow">مساحة العمل</span>
-                    <h2>حصصك</h2>
+                <div className="card-heading">
+                  <div className="card-heading-title">
+                    <div>
+                      <span className="card-eyebrow">مساحة العمل</span>
+                      <h2>حصصك</h2>
+                    </div>
                   </div>
-                  <button className="button sidebar-add-top-button" type="button" onClick={createModal.open} title="إنشاء حصة جديدة">
+                  <button className="button sidebar-add-top-button turquoise" type="button" onClick={createModal.open} title="إنشاء حصة جديدة">
                     <Plus size={18} />
                   </button>
                 </div>
@@ -553,83 +555,86 @@ function InstructorView() {
                   )}
                 </div>
 
-                <button className="button create-session-bottom-button" type="button" onClick={createModal.open}>
+                <button className="button create-session-bottom-button turquoise" type="button" onClick={createModal.open}>
                   <Plus size={16} /> إنشاء حصة جديدة
                 </button>
               </section>
             </aside>
 
             {!session.selectedSession ? (
-              <div className="card no-session-state panel">
-                <div className="card-heading-row">
-                  <div className="no-session-icon"><CalendarDays size={26} /></div>
-                  <h2>أنشئ حصة جديدة او اختار حصة من حصصك</h2>
+              <div className="card">
+                <div className="card-heading">
+                  <div className="card-heading-title">
+                    <div className="card-icon yellow"><CalendarDays size={26} /></div>
+                    <div>
+                      <h2>اختار حصة او انشئ حصة جديدة</h2>
+                    </div>
+                  </div>              
                 </div>
                 <p>
                   حدّد ميعاد الحصة وبعدها أضف أسئلتك اليدوية. او ارفع الملف وسيب الذكاء الاصطناعي يولد لك اسئله.<br/>
                   حدد طلاب الحصه من قبلها او ابعت لهم كود الحصه.
                 </p>
-                <button className="button button-primary" type="button" onClick={createModal.open}>
+                <button className="button button-primary turquoise" type="button" onClick={createModal.open}>
                   <Plus size={17} /> إنشاء حصة جديدة
                 </button>
               </div>
             ) : (
               <section className="session-workspace">
                 <div className="card">
-                  <div className="selected-session-top">
-                    <div className="selected-session-main">
-                      <div className="session-detail-icon"><BookOpen size={23} /></div>
-                      <div className="session-title-block">
-                        <div className="detail-overline">
-                          <span className={`status-dot ${session.selectedSession.status}`} />
-                          {session.selectedSession.status === "draft" ? "مسودة" : session.selectedSession.status === "completed" ? "مكتملة" : "حصة مجدولة"}
-                          <span className="detail-overline-separator">/</span>
-                          <p>{session.selectedSession.subject}</p>
-                          <span className="detail-overline-separator">/</span>
-                          <span>{session.selectedSession.code}</span>
+                  <div className="card-heading">
+                    <div className="card-heading">
+                      <div className="card-heading-title">
+                        <div className="card-icon turquoise"><BookOpen size={23} /></div>
+                        <div>
+                          <div className="card-eyebrow-div">
+                            <span className={`status-dot ${session.selectedSession.status}`} />
+                            {session.selectedSession.status === "draft" ? "مسودة" : session.selectedSession.status === "completed" ? "مكتملة" : "حصة مجدولة"}
+                            <span className="card-eyebrow-separator">/</span>
+                            <span className="card-eyebrow">{session.selectedSession.subject}</span>
+                            <span className="card-eyebrow-separator">/</span>
+                            <span className="card-eyebrow">{session.selectedSession.code}</span>
+                          </div>
+                          <h2>{session.selectedSession.title}</h2>
                         </div>
-                        <h2>{session.selectedSession.title}</h2>
                       </div>
                     </div>
-                    {session.selectedSession.status === "draft" ? (
-                      <span className="overview-status overview-status-check">
-                        <Check size={16} />
-                        لم يتم تنبيه الطلاب بعد!
-                      </span>
-                    ) : session.selectedSession.status === "completed" ? (
-                      <span className="overview-status overview-status-completed">
-                        <CheckCheck size={16} />
-                        انتهت الحصة
-                      </span>
-                    ) : (
-                      <span className="overview-status overview-status-doublecheck">
-                        <CheckCheck size={16} />
-                        كل شيء جاهز للحصة
-                      </span>
-                    )}
-                    {session.selectedSession.status !== "completed" && (
-                      <>
-                        <button
-                          className="button icon-button delete-session-button"
-                          type="button"
-                          onClick={() => deleteModal.requestDelete(session.selectedSession.id)}
-                          aria-label="حذف الحصة"
-                          title="حذف الحصة"
-                        >
-                          <Trash2 size={17} />
-                        </button>
 
-                        {session.selectedSession.status === "draft" ? (
-                          <button className="button button-primary schedule-session-button" type="button" onClick={handleScheduleSession}>
-                            <CalendarDays size={16} /> جدول الحصة
+                    <div className="card-actions">
+                      {session.selectedSession.status === "draft" ? (
+                        <span className="overview-status overview-status-check">
+                          <Check size={16} />
+                          لم يتم تنبيه الطلاب بعد!
+                        </span>
+                      ) : session.selectedSession.status === "completed" ? (
+                        <span className="overview-status overview-status-completed">
+                          <CheckCheck size={16} />
+                          انتهت الحصة
+                        </span>
+                      ) : (
+                        <span className="overview-status overview-status-doublecheck">
+                          <CheckCheck size={16} />
+                          كل شيء جاهز للحصة
+                        </span>
+                      )}
+                      {session.selectedSession.status !== "completed" && (
+                        <>
+                          <button className="button icon-button delete-session-button" type="button" onClick={() => deleteModal.requestDelete(session.selectedSession.id)} aria-label="حذف الحصة" title="حذف الحصة">
+                            <Trash2 size={17} />
                           </button>
-                        ) : (
-                          <button className="button button-primary launch-session-button" type="button" onClick={handleStartLiveSession}>
-                            <Play size={16} fill="currentColor" /> ابدأ الحصة
-                          </button>
-                        )}
-                      </>
-                    )}
+
+                          {session.selectedSession.status === "draft" ? (
+                            <button className="button button-primary turquoise" type="button" onClick={handleScheduleSession}>
+                              <CalendarDays size={16} /> جدول الحصة
+                            </button>
+                          ) : (
+                            <button className="button button-primary red" type="button" onClick={handleStartLiveSession}>
+                              <Play size={16} fill="currentColor" /> ابدأ الحصة
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
                   <div className="session-meta-row">
                     <div className="chip session-meta-item">
@@ -645,7 +650,7 @@ function InstructorView() {
                       <span><small>الطلاب</small><strong>{session.selectedSession.studentnumber} مشارك</strong></span>
                     </div>
                     {session.selectedSession.status !== "completed" && (
-                      <button className="button session-meta-settings" type="button" onClick={editModal.open}>
+                      <button className="button session-meta-settings turquoise" type="button" onClick={editModal.open}>
                         <Settings2 size={15} /> تفاصيل الحصة
                       </button>
                     )}
@@ -653,16 +658,16 @@ function InstructorView() {
                 </div>
 
                 <div className={session.selectedSession.status === "completed" ? "questions-flex" : "questions"}>
-                  <section className="card questions-container" aria-labelledby="questions-title">
-                    <div className="panel-heading">
-                      <div className="panel-heading-title">
-                        <div className="panel-icon manual-icon"><BookOpenCheck size={19} /></div>
+                  <section className="card stack-card" aria-labelledby="questions-title">
+                    <div className="card-heading">
+                      <div className="card-heading-title">
+                        <div className="card-icon small-card-icon yellow"><BookOpenCheck size={19} /></div>
                         <div><h2 id="questions-title">الأسئلة</h2></div>
                       </div>
                       <span className="count-pill">{question.questions.length} سؤال</span>
                     </div>
 
-                    <p className="panel-description">
+                    <p className="card-description">
                       {session.selectedSession.status === "completed"
                         ? "دي الأسئلة اللي كانت معانا في الدرس."
                         : "اكتب الأسئلة اللي انت عايزها أو ارفع ملف وسيب الـ AI يعملهالك."}
@@ -731,19 +736,21 @@ function InstructorView() {
                     )}
 
                     {session.selectedSession.status !== "completed" && (
-                      <button className="button open-question-form-button" type="button" onClick={question.startAdd} >
+                      <button className="button open-question-form-button turquoise" type="button" onClick={question.startAdd} >
                         <Plus size={17} /> أضف سؤالًا يدويًا
                       </button>
                     )}
                   </section>
 
                   {session.selectedSession.status !== "completed" && (
-                    <div className="card screen material-upload-card">
-                      <div className="card-heading-row">
-                        <div className="control-icon control-icon-purple"><Sparkles size={19} /></div>
-                        <div>
-                          <span className="section-eyebrow">الذكاء الاصطناعي</span>
-                          <h2>ارفع ملف الشرح وهنعمل لك الاسئله</h2>
+                    <div className="card screen stack-card">
+                      <div className="card-heading">
+                        <div className="card-heading-title">
+                          <div className="card-icon small-card-icon blue"><Sparkles size={19} /></div>
+                          <div>
+                            <span className="card-eyebrow">الذكاء الاصطناعي</span>
+                            <h2>ارفع ملف الشرح وهنعمل لك الاسئله</h2>
+                          </div>
                         </div>
                       </div>
 

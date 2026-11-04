@@ -11,4 +11,406 @@
   flex: 0 0 450px;
   width: 450px;
   max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2vw, 20px);
+}
+
+
+
+.join-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.join-form label {
+  color: var(--C-yalla-text-secondary);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.join-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 14px;
+  background: var(--C-yalla-fg);
+  border: var(--yalla-border);
+  border-radius: var(--yalla-radius-sm);
+  box-shadow: var(--yalla-shadow-sm);
+  transition: box-shadow 0.12s ease;
+}
+
+.join-input-wrap:focus-within {
+  box-shadow: var(--yalla-shadow-button);
+}
+
+.join-input-wrap svg {
+  flex: 0 0 auto;
+  color: var(--C-yalla-primary-strong);
+}
+
+.join-input-wrap input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 44px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--C-yalla-bg);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  outline: none;
+}
+
+.join-input-wrap input::placeholder {
+  color: rgba(11, 31, 42, 0.4);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.join-submit {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.join-submit svg {
+  flex: 0 0 auto;
+}
+
+
+
+/* ========== Sessions Grid (Container) ========== */
+.session-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: clamp(16px, 2.4vw, 24px);
+  width: 100%;
+}
+
+/* ========== Session Card ========== */
+
+.session-field {
+  gap: 18px;
+}
+
+.session-field-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* شارة "خلصت" / "مسجل" */
+.session-field .session-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(39, 194, 129, 0.15);
+  color: var(--C-yalla-success);
+  border: 2px solid var(--C-yalla-border-strong);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  line-height: 1.2;
+}
+
+.session-field .session-status > span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: 0 0 auto;
+}
+
+/* كود الجلسة */
+.session-field .session-code {
+  font-family: var(--font-display);
+  background: var(--C-yalla-fg);
+  color: var(--C-yalla-bg);
+  border: 2px solid var(--C-yalla-border-strong);
+  border-radius: 10px;
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: 2px 2px 0 var(--C-yalla-border-strong);
+}
+
+.session-field-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.session-field-subject-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  background: var(--C-yalla-primary);
+  color: var(--C-yalla-bg);
+  border: 2px solid var(--C-yalla-border-strong);
+  border-radius: 12px;
+  box-shadow: 3px 3px 0 var(--C-yalla-border-strong);
+}
+
+.session-field-title-row > div {
+  min-width: 0;
+}
+
+.session-field-title-row h3 {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--C-yalla-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.session-field-title-row p {
+  margin: 0;
+  color: var(--C-yalla-text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.session-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.session-meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid rgba(2, 9, 13, 0.6);
+  border-radius: 10px;
+  color: var(--C-yalla-text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.session-meta > span svg {
+  color: var(--C-yalla-primary);
+  flex: 0 0 auto;
+}
+
+.session-meta > span small {
+  color: var(--C-yalla-text-tertiary);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.materials-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+}
+
+.materials-block-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.materials-block-heading > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--C-yalla-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.materials-block-heading small {
+  color: var(--C-yalla-text-tertiary);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.material-files {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.material-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 62px;
+  padding: 8px 10px;
+  border: 2px solid color-mix(in srgb, var(--C-yalla-tint) 19%, transparent);
+  border-radius: 13px;
+  color: var(--C-yalla-fg);
+  background: var(--C-yalla-surface);
+  text-align: right;
+  cursor: pointer;
+  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.material-file:hover {
+  transform: translateY(-2px);
+  border-color: var(--C-yalla-primary);
+  box-shadow: 3px 3px 0 color-mix(in srgb, var(--C-yalla-primary) 45%, transparent);
+}
+
+.material-file-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  background: var(--C-yalla-info);
+  color: var(--C-yalla-fg);
+  border-radius: 10px;
+  border: 2px solid var(--C-yalla-border-strong);
+}
+
+.material-file-copy {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 2px;
+}
+
+.material-file-copy strong {
+  color: var(--C-yalla-fg);
+  font-size: 0.82rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.material-file__copy small {
+  color: var(--C-yalla-text-tertiary);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.material-file-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  color: var(--C-yalla-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.material-file:hover .material-file-open {
+  color: var(--C-yalla-highlight);
+}
+
+.no-materials {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 8px 10px;
+  color: var(--C-yalla-text-tertiary);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.session-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(15, 181, 166, 0.08);
+  border: 2px solid rgba(15, 181, 166, 0.3);
+  border-radius: 12px;
+}
+
+.session-stats > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--C-yalla-surface);
+  border: 2px solid rgba(2, 9, 13, 0.6);
+  border-radius: 8px;
+  color: var(--C-yalla-fg);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.session-field-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 2px dashed rgba(2, 9, 13, 0.6);
+  margin-top: auto;
+}
+
+.session-field-footer .button-primary {
+  flex: 1 1 auto;
+}
+
+.session-questions-hidden,
+.session-not-ready {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--C-yalla-text-tertiary);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.session-questions-hidden {
+  color: var(--C-yalla-highlight);
+}
+
+.sessions-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 2px dashed rgba(2, 9, 13, 0.6);
+}
+
+.sessions-panel-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  background: rgba(15, 181, 166, 0.15);
+  color: var(--C-yalla-primary);
+  border: 2px solid var(--C-yalla-border-strong);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
 }

@@ -17,23 +17,21 @@ export default function ReopenSessionAlert({
 
   return (
     <div className="opened-window-backdrop" onClick={onClose}>
-      <div className="card reopen" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-        <div className="reopen-heading">
-          <div className="reopen-stamp">
-            <RotateCcw size={22} />
+      <div className="card modal-window" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        <div className="card-heading">
+          <div className="card-heading-title">
+            <div className="card-icon turquoise"><RotateCcw size={22} /></div>
+            <div>
+              <span className="card-kicker">تأكيد الإنهاء / خطوة أخيرة</span>
+              <h2 className="modal-title">إعادة فتح الجولة</h2>
+            </div>
           </div>
-
-          <div>
-            <span className="reopen-kicker">تأكيد الإنهاء / خطوة أخيرة</span>
-            <h2 id="reopen-title">إعادة فتح الجولة</h2>
-          </div>
-
-          <button className="close-button windowed-close-button" type="button" onClick={onClose} aria-label="إغلاق">
+          <button className="modal-close-button" type="button" onClick={onClose} aria-label="إغلاق">
             <X size={17} />
           </button>
         </div>
 
-        <div className="end-live-content">
+        <div className="modal-content">
           <p>
             هيتفتح لـ <b>{pendingCount}</b> من <b>{totalStudents}</b> طالب لسه
             مكملوش. اللي خلص خلاص مقفول عليه.
@@ -49,11 +47,11 @@ export default function ReopenSessionAlert({
               : "إجاباته القديمة زي ما هي، هيكمّل الأسئلة الفاضية بس."}
           </p>
 
-          <div className="end-live-actions">
-            <button className="button ReopenSession-button white-background" type="button" onClick={onClose}>
+          <div className="modal-actions">
+            <button className="button modal-button white" type="button" onClick={onClose}>
               إلغاء
             </button>
-            <button className="button ReopenSession-button button-primary" type="button" onClick={handleConfirm}>
+            <button className="button modal-button turquoise" type="button" onClick={handleConfirm}>
               <Check size={16} /> افتح الجولة
             </button>
           </div>
