@@ -753,7 +753,7 @@ function StudentView() {
                   </p>
                 )}
 
-                <button className="button button-primary join-submit" type="submit">
+                <button className="button button-center button-primary join-submit" type="submit">
                   ادخل الحصة <ArrowLeft size={18} />
                 </button>
                 
@@ -967,7 +967,7 @@ function StudentView() {
 
             <button
               type="button"
-              className="button button-primary ghost"
+              className="button button-center button-primary red"
               onClick={handleLeave}
               style={{ marginTop: 8 }}
             >

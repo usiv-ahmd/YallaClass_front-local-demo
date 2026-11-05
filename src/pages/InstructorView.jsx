@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, ListChecks, Play, Pause, SkipForward,
     Eye, LogOut, Check, CheckCheck, X, RotateCcw, Lock, Trash2, UploadCloud, FileText, BookOpen, Settings2,
-    BookOpenCheck, Minus, Clock, Timer, ClipboardList, Trophy, Pencil, Bell } from "lucide-react";
+    BookOpenCheck, Minus, Clock, Timer, ClipboardList, Trophy, Pencil, Bell, Download } from "lucide-react"; // 👈 ضفنا Download
 
   import SessionFormWindow from "../modals/SessionFormWindow.jsx";
   import QuestionFormWindow from "../modals/QuestionFormWindow.jsx";
@@ -34,7 +34,6 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
   function Leaderboard({ students = [], onWarn, onDelete }) {
     const attendedCount = students.filter((s) => s.attended).length;
 
-    // ⏱️ الآن — بيتحدّث كل 10 ثواني عشان نحسب online/offline بدقة
     const [now, setNow] = useState(() => Date.now());
     useEffect(() => {
       const i = setInterval(() => setNow(Date.now()), 10_000);
@@ -58,6 +57,44 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
       if (ok) onDelete?.(student.id);
     };
 
+    const exportToCSV = () => {
+      if (!students || students.length === 0) {
+        alert("لا يوجد طلاب لتصدير بياناتهم.");
+        return;
+      }
+
+      const headers = ["#", "الاسم", "صح", "غلط", "حضور", "تفاعل", "(Score)", "(Streak)"];
+      
+      const rows = students.map((student, index) => [
+        index + 1,
+        student.name,
+        student.correctAnswers || 0,
+        student.wrongAnswers || 0,
+        student.attended ? "حاضر" : "غائب",
+        student.interacted ? "متفاعل" : "لم يتفاعل",
+        student.score || 0,
+        student.highestStreak || 0
+      ]);
+
+      const csvContent = [
+        headers.join(","),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
+      ].join("\n");
+
+      const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+      
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      
+      const date = new Date().toLocaleDateString("ar-EG").replace(/\//g, "-");
+      link.setAttribute("download", `كشف_الحضور_${date}.csv`);
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+
     return (
       <div className="card">
         <div className="card-heading">
@@ -67,6 +104,7 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
             </div>
             <h2>الحضور والتفاعل</h2>
           </div>
+          
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <span className="count-pill" title="عدد الحاضرين">{attendedCount}</span>
             <span
@@ -76,6 +114,15 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
             >
               {onlineCount} متصل
             </span>
+            <button
+              type="button"
+              className="button icon-button"
+              onClick={exportToCSV}
+              title="تصدير جدول الطلاب (Excel/CSV)"
+              aria-label="تصدير الجدول"
+            >
+              <Download size={16} />
+            </button>
           </div>
         </div>
         <table className="students-table">
