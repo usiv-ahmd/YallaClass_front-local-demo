@@ -36,59 +36,61 @@ export default function Login() {
   };
 
   return (
-    <>
-      <div className="card auth-container">
-        <div className="auth-header">
-          <h2>تسجيل دخول المدرس</h2>
-          <p>سجّل دخولك عشان تنشئ الحصص وتتحكم فيها.</p>
+    <div className="page">
+      <div className="dashboard">
+        <div className="layout">
+          <div className="card auth-container">
+            <div className="auth-header">
+              <h2 className="auth-tilte">تسجيل دخول المدرس</h2>
+              <p>سجّل دخولك عشان تنشئ الحصص وتتحكم فيها.</p>
+            </div>
+
+            <form onSubmit={handleSubmit}>
+              <label>البريد الإلكتروني</label>
+              <div className="input-wrap">
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="instructor@yalla.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <label>كلمة المرور</label>
+              <div className="input-wrap">
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              {error && <p className="auth-error">{error}</p>}
+
+              <button type="submit" className="submit-btn">دخول كمدرس</button>
+            </form>
+
+            <span className="auth-switch">
+              ليس لديك حساب مدرس؟ <Link to="/register">إنشاء حساب جديد</Link>
+            </span>
+            <span className="auth-switch">
+              انت طالب؟ <Link to="/student-dashboard">دوس هنا</Link>
+            </span>
+
+            <span className="auth-back">
+              <Link to="/"><ArrowLeft size={14} /> رجوع للصفحة الرئيسية</Link>
+            </span>
+          </div>
         </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>البريد الإلكتروني</label>
-            <input
-              type="email"
-              name="email"
-              placeholder="instructor@yalla.com"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>كلمة المرور</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {error && <p className="auth-error">{error}</p>}
-
-          <button type="submit" className="submit-btn">دخول كمدرس</button>
-        </form>
-
-        <p className="auth-switch">
-          
-        </p>
-
-        <p className="auth-switch">
-          انت طالب؟ <Link to="/student-dashboard">دوس هنا</Link><br/>
-          ليس لديك حساب مدرس؟ <Link to="/register">إنشاء حساب جديد</Link>
-        </p>
-
-        <p className="auth-back">
-          <Link to="/"><ArrowLeft size={14} /> رجوع للصفحة الرئيسية</Link>
-        </p>
       </div>
 
       {/* ═══════════ MOCK LOGIN (temporary) ═══════════ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 18 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 20 }}>
           <button
             type="button"
             onClick={() => fillMock('instructor')}
@@ -104,6 +106,6 @@ export default function Login() {
           </button>
         </div>
       {/* ═══════════ /MOCK LOGIN ═══════════ */}
-    </>
+    </div>
   );
 }

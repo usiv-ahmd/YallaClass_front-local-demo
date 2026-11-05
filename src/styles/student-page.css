@@ -9,10 +9,6 @@
   gap: clamp(14px, 2vw, 20px);
 }
 
-.join-card {
-  max-width: 540px;
-}
-
 
 
 .join-form {

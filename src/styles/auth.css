@@ -1,19 +1,6 @@
-.auth-container {
-  max-width: 440px;
-  margin: 60px auto;
-  padding: 28px 24px;
-  background: var(--C-yalla-surface);
-  border: 3px solid var(--C-yalla-border-strong);
-  border-radius: 20px;
-  box-shadow: var(--yalla-shadow);
-  text-align: center;
-}
-
-.auth-container h2 {
+.auth-tilte {
   font-family: var(--font-display);
   color: var(--C-yalla-highlight);
-  margin-top: 0;
-  margin-bottom: 22px;
   font-size: 26px;
 }
 
@@ -54,23 +41,6 @@
   gap: 6px;
 }
 
-.form-group label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--C-yalla-text-secondary);
-}
-
-.auth-container input {
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 3px solid var(--C-yalla-border-strong);
-  background: var(--C-yalla-bg);
-  color: var(--C-yalla-fg);
-  font-family: var(--font-body);
-  font-size: 15px;
-  outline: none;
-  transition: border-color 0.2s;
-}
 
 .auth-container input:focus {
   border-color: var(--C-yalla-highlight);
@@ -78,6 +48,7 @@
 
 .submit-btn {
   margin-top: 8px;
+  margin-bottom: 20px;
   padding: 12px;
   background: var(--C-yalla-danger);
   color: var(--C-yalla-fg);
@@ -95,12 +66,15 @@
 }
 
 .auth-switch {
-  margin-top: 20px;
+  text-align: center;
+  margin-bottom: 10px;
   font-size: 14px;
   color: var(--C-yalla-text-secondary);
 }
 
 .auth-switch a {
+  display: inline-flex;
+  align-items: center;
   color: var(--C-yalla-highlight);
   text-decoration: none;
   font-weight: 600;
@@ -109,7 +83,6 @@
 .auth-switch a:hover {
   text-decoration: underline;
 }
-
 
 
 
@@ -191,21 +164,4 @@
 .mock-btn--alt:hover {
   background: rgba(8, 145, 178, 0.1);
   border-color: #0891b2;
-}
-
-/* Back link */
-.auth-back {
-  text-align: center;
-  margin-top: 14px;
-  font-size: 0.82rem;
-}
-.auth-back a {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: #64748b;
-  text-decoration: none;
-}
-.auth-back a:hover {
-  color: #0f172a;
 }

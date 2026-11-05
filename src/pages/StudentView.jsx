@@ -1,5 +1,6 @@
 // src/pages/StudentView.jsx
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import {
   KeyRound, ArrowLeft, AlertCircle, Check, Clock3, Zap, Flame,
   X, Sparkles, Trophy, Users, ListChecks, Timer,
@@ -709,7 +710,7 @@ function StudentView() {
       <div className="page">
         <main className="dashboard">
           <div className="layout">
-            <div className="card stack-card join-card">
+            <div className="card stack-card auth-container">
               <div className="card-heading">
                 <div className="card-heading-title">
                   <span className="card-icon yellow"><KeyRound size={26} /></span>
@@ -757,6 +758,10 @@ function StudentView() {
                 <button className="button button-primary join-submit" type="submit">
                   ادخل الحصة <ArrowLeft size={18} />
                 </button>
+                
+                <span className="auth-back">
+                  <Link to="/"><ArrowLeft size={14} /> رجوع للصفحة الرئيسية</Link>
+                </span>
               </form>
             </div>
           </div>

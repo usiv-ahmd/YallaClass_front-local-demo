@@ -140,6 +140,9 @@ body {
   overflow: hidden;
   transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
 }
+.auth-container {
+  max-width: 440px;
+}
 .stack-card {
   gap: 14px;
 }
@@ -583,9 +586,9 @@ button {
 
 
 label {
+  font-size: 14px;
+  font-weight: 600;
   color: var(--C-yalla-text-secondary);
-  font-size: 0.85rem;
-  font-weight: 700;
 }
 
 .input-wrap {
@@ -642,4 +645,34 @@ label {
   color: #c53030;
   position: static !important;
   background-color: transparent !important;
+}
+
+.auth-back {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 0.82rem;
+}
+.auth-back a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #64748b;
+  text-decoration: none;
+}
+.auth-back a:hover {
+  text-decoration: underline;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    /* The box-shadow hack to override the yellow background */
+    -webkit-box-shadow: 0 0 0 1000px var(--white) inset !important;
+    
+    /* The text color */
+    -webkit-text-fill-color: var(--C-yalla-border-strong) !important;
+    
+    /* Optional: transition hack if box-shadow doesn't fully work */
+    transition: background-color 5000s ease-in-out 0s;
 }

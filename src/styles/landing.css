@@ -59,7 +59,14 @@
   padding: 24px;
   box-shadow: var(--yalla-shadow);
   text-align: right;
-  transition: transform 0.2s;
+  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.landing-card:hover {
+  box-shadow: var(--yalla-shadow-button-hover);
+}
+.landing-card:active {
+  transform: translate(4px, 4px);
+  box-shadow: 2px 2px 0 var(--C-yalla-bg);
 }
 
 .landing-card-icon {

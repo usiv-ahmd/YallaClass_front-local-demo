@@ -1,7 +1,9 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import '../styles/landing.css';
 
 export default function LandingPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="landing-container">
       <div className="landing-badge">🚀 المنصة التفاعلية الأولى</div>
@@ -15,19 +17,19 @@ export default function LandingPage() {
       </p>
 
       <div className="landing-cards">
-        <Link to="/student-dashboard" className="card landing-card landing-card--student">
+        <button type="button" onClick={() => navigate("/student-dashboard")} className="card landing-card">
           <div className="landing-card-icon">🎓</div>
           <h3>أنا طالب</h3>
           <p>اكتب اسمك وكود الحصة، وابدأ الإجابة مع زملائك من غير تسجيل.</p>
           <span className="landing-card-cta">دخول كطالب ←</span>
-        </Link>
+        </button>
 
-        <Link to="/login" className="card landing-card landing-card--instructor">
+        <button type="button" onClick={() => navigate("/login")} className="card landing-card">
           <div className="landing-card-icon">👨‍🏫</div>
           <h3>أنا مدرس</h3>
           <p>سجّل دخولك عشان تنشئ الحصة وتتحكم في الأسئلة والترتيب.</p>
           <span className="landing-card-cta">دخول كمدرس ←</span>
-        </Link>
+        </button>
       </div>
     </div>
   );
