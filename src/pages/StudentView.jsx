@@ -855,145 +855,143 @@ function StudentView() {
               const answer = currentAnswer;
 
               return (
-                <div>
+                <div className="student-question" data-heat={Math.min(4, heat)}>
                   {isPaused && (
                     <div className="session-status status-paused" style={{ marginBottom: 12 }}>
                       <i /> المدرس وقّف الحصة مؤقتاً
                     </div>
                   )}
 
-                  <div className="student-question" data-heat={Math.min(4, heat)}>
-                    <div className="question-meta-row">
-                      <div className="question-header-title">
-                        <span>أهلاً يا {freshStudent.name}</span>
-                        <h2>{session.title ?? "جلسة"}</h2>
-                      </div>
-                      
-                      <span className="mini-label">سؤال {formatNumber(index + 1)} من {formatNumber(total)}</span>
-
-                      <div className="question-stats">
-                        <span className="stat-chip">
-                          <Users size={16} /> {formatNumber(totalStudents)} <small>طالب</small>
-                        </span>
-                        <span className="stat-chip" style={{ color: '#10b981' }}>
-                          <Check size={16} style={{ color: '#10b981' }}/> {formatNumber(freshStudent.correctAnswers)} <small style={{ color: '#10b981' }}>صح</small>
-                        </span>
-                        <span className="stat-chip" style={{ color: '#ef4444' }}>
-                          <X size={16} style={{ color: '#ef4444' }}/> {formatNumber(freshStudent.wrongAnswers)} <small style={{ color: '#ef4444' }}>غلط</small>
-                        </span>
-                        <span className="stat-chip">
-                          <Zap size={16} /> {formatNumber(freshStudent.score)} <small>نقطة</small>
-                        </span>
-                        <span className="stat-chip stat-chip--streak">
-                          <Flame size={16} /> {formatNumber(freshStudent.highestStreak)} <small>streak</small>
-                        </span>
-                      </div>
+                  <div className="question-meta-row">
+                    <div className="question-header-title">
+                      <span>أهلاً يا {freshStudent.name}</span>
+                      <h2>{session.title ?? "جلسة"}</h2>
                     </div>
 
-                    <div className="question-progress">
-                      {Array.from({ length: total }, (_, i) => (
-                        <span
-                          key={i}
-                          className={
-                            "question-progress__step" +
-                            (i < index ? " is-done" : "") +
-                            (i === index ? " is-current" : "")
-                          }
-                        />
-                      ))}
+                    <span className="mini-label">سؤال {formatNumber(index + 1)} من {formatNumber(total)}</span>
+
+                    <div className="question-stats">
+                      <span className="stat-chip">
+                        <Users size={16} /> {formatNumber(totalStudents)} <small>طالب</small>
+                      </span>
+                      <span className="stat-chip" style={{ color: '#10b981' }}>
+                        <Check size={16} style={{ color: '#10b981' }}/> {formatNumber(freshStudent.correctAnswers)} <small style={{ color: '#10b981' }}>صح</small>
+                      </span>
+                      <span className="stat-chip" style={{ color: '#ef4444' }}>
+                        <X size={16} style={{ color: '#ef4444' }}/> {formatNumber(freshStudent.wrongAnswers)} <small style={{ color: '#ef4444' }}>غلط</small>
+                      </span>
+                      <span className="stat-chip">
+                        <Zap size={16} /> {formatNumber(freshStudent.score)} <small>نقطة</small>
+                      </span>
+                      <span className="stat-chip stat-chip--streak">
+                        <Flame size={16} /> {formatNumber(freshStudent.highestStreak)} <small>streak</small>
+                      </span>
                     </div>
-
-                    <div className="question-main-row">
-                      <div className="question-copy">
-                        <h2>{currentQuestion.text ?? currentQuestion.question}</h2>
-                      </div>
-                      <div
-                        className={`timer-ring ${timerMood}`}
-                        style={{ "--timer-angle": `${progress * 360}deg` }}
-                        role="timer"
-                      >
-                        <div className="timer-ring__inner">
-                          <Clock3 size={15} />
-                          <strong>{formatNumber(Math.ceil(displayedTime))}</strong>
-                          <small>ث</small>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="answer-prompt">
-                      <Sparkles size={18} /> <span>اختار إجابتك</span>
-                    </div>
-
-                    <div className="answer-grid">
-                      {(currentQuestion.options || []).map((option, optIndex) => {
-                        const isCorrectOption = optIndex === getCorrectIndex(currentQuestion);
-                        const isSelected = answer?.selectedOption === optIndex;
-                        let stateClass = "";
-
-                        if (answer) {
-                          if (isCorrectOption) stateClass = " answer-option--correct";
-                          if (isSelected && !answer.isCorrect) stateClass = " answer-option--wrong";
-                          if (!isCorrectOption && !isSelected) stateClass = " answer-option--muted";
-                        } else if (readOnly) {
-                          if (isCorrectOption) stateClass = " answer-option--correct";
-                          else stateClass = " answer-option--muted";
-                        }
-
-                        return (
-                          <button
-                            key={optIndex}
-                            type="button"
-                            disabled={Boolean(answer) || readOnly}
-                            className={`answer-option answer-option--${
-                              ANSWER_COLORS[optIndex % ANSWER_COLORS.length]
-                            }${stateClass}`}
-                            onClick={() => onOptionClick(optIndex)}
-                          >
-                            <span className="answer-option__key">
-                              {answer && isCorrectOption ? <Check size={19} strokeWidth={3} /> : null}
-                              {answer && isSelected && !answer.isCorrect ? <X size={19} strokeWidth={3} /> : null}
-                              {!answer || (!isCorrectOption && !isSelected) ? ANSWER_LABELS[optIndex] : null}
-                            </span>
-                            <span className="answer-option__text">{option}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {answer && (
-                      <div
-                        className={`answer-result ${
-                          answer.isCorrect ? "answer-result--good" : "answer-result--retry"
-                        }`}
-                        role="status"
-                      >
-                        <span className="answer-result__icon">
-                          {answer.isCorrect ? <Check size={20} /> : <Sparkles size={19} />}
-                        </span>
-                        <span>
-                          <strong>
-                            {answer.isCorrect
-                              ? `إجابة صحيحة! +${formatNumber(answer.points)} نقطة`
-                              : "إجابة غلط"}
-                          </strong>
-                          {answer.isCorrect && answer.speedBonus > 0 && (
-                            <small>+{formatNumber(answer.speedBonus)} مكافأة سرعة</small>
-                          )}
-                          {!answer.isCorrect && (
-                            <small>
-                              الإجابة الصحيحة: {currentQuestion.options?.[getCorrectIndex(currentQuestion)]}
-                            </small>
-                          )}
-                        </span>
-                      </div>
-                    )}
-
-                    {readOnly && !answer && (
-                      <p className="muted" style={{ textAlign: "center", marginTop: 12 }}>
-                        الوقت خلص. الإجابة الصحيحة: {currentQuestion.options?.[getCorrectIndex(currentQuestion)]}
-                      </p>
-                    )}
                   </div>
+
+                  <div className="question-progress">
+                    {Array.from({ length: total }, (_, i) => (
+                      <span
+                        key={i}
+                        className={
+                          "question-progress__step" +
+                          (i < index ? " is-done" : "") +
+                          (i === index ? " is-current" : "")
+                        }
+                      />
+                    ))}
+                  </div>
+
+                  <div className="question-main-row">
+                    <div className="question-copy">
+                      <h2>{currentQuestion.text ?? currentQuestion.question}</h2>
+                    </div>
+                    <div
+                      className={`timer-ring ${timerMood}`}
+                      style={{ "--timer-angle": `${progress * 360}deg` }}
+                      role="timer"
+                    >
+                      <div className="timer-ring__inner">
+                        <Clock3 size={15} />
+                        <strong>{formatNumber(Math.ceil(displayedTime))}</strong>
+                        <small>ث</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="answer-prompt">
+                    <Sparkles size={18} /> <span>اختار إجابتك</span>
+                  </div>
+
+                  <div className="answer-grid">
+                    {(currentQuestion.options || []).map((option, optIndex) => {
+                      const isCorrectOption = optIndex === getCorrectIndex(currentQuestion);
+                      const isSelected = answer?.selectedOption === optIndex;
+                      let stateClass = "";
+
+                      if (answer) {
+                        if (isCorrectOption) stateClass = " answer-option--correct";
+                        if (isSelected && !answer.isCorrect) stateClass = " answer-option--wrong";
+                        if (!isCorrectOption && !isSelected) stateClass = " answer-option--muted";
+                      } else if (readOnly) {
+                        if (isCorrectOption) stateClass = " answer-option--correct";
+                        else stateClass = " answer-option--muted";
+                      }
+
+                      return (
+                        <button
+                          key={optIndex}
+                          type="button"
+                          disabled={Boolean(answer) || readOnly}
+                          className={`answer-option answer-option--${
+                            ANSWER_COLORS[optIndex % ANSWER_COLORS.length]
+                          }${stateClass}`}
+                          onClick={() => onOptionClick(optIndex)}
+                        >
+                          <span className="answer-option__key">
+                            {answer && isCorrectOption ? <Check size={19} strokeWidth={3} /> : null}
+                            {answer && isSelected && !answer.isCorrect ? <X size={19} strokeWidth={3} /> : null}
+                            {!answer || (!isCorrectOption && !isSelected) ? ANSWER_LABELS[optIndex] : null}
+                          </span>
+                          <span className="answer-option__text">{option}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {answer && (
+                    <div
+                      className={`answer-result ${
+                        answer.isCorrect ? "answer-result--good" : "answer-result--retry"
+                      }`}
+                      role="status"
+                    >
+                      <span className="answer-result__icon">
+                        {answer.isCorrect ? <Check size={20} /> : <Sparkles size={19} />}
+                      </span>
+                      <span>
+                        <strong>
+                          {answer.isCorrect
+                            ? `إجابة صحيحة! +${formatNumber(answer.points)} نقطة`
+                            : "إجابة غلط"}
+                        </strong>
+                        {answer.isCorrect && answer.speedBonus > 0 && (
+                          <small>+{formatNumber(answer.speedBonus)} مكافأة سرعة</small>
+                        )}
+                        {!answer.isCorrect && (
+                          <small>
+                            الإجابة الصحيحة: {currentQuestion.options?.[getCorrectIndex(currentQuestion)]}
+                          </small>
+                        )}
+                      </span>
+                    </div>
+                  )}
+
+                  {readOnly && !answer && (
+                    <p className="muted" style={{ textAlign: "center", marginTop: 12 }}>
+                      الوقت خلص. الإجابة الصحيحة: {currentQuestion.options?.[getCorrectIndex(currentQuestion)]}
+                    </p>
+                  )}
                 </div>
               );
             })()}

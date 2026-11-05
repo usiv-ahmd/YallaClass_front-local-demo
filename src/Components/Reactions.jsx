@@ -1,34 +1,57 @@
-import { useEffect, useState } from "react";
-import { YC_REACTIONS } from "../constants/reactions";
+import React, { useEffect, useRef, useState } from "react";
+import { YC_REACTIONS } from "../utils/reactions";
 import "../styles/reactions.css";
 
-export function Reaction({ reactionKey, triggerId, onDone, duration }) {
-  const [visible, setVisible] = useState(false);
-  const r = reactionKey ? YC_REACTIONS[reactionKey] : null;
+// ⏱️ التحكم في وقت البقاء على الشاشة
+const HOLD_MS = 600;
+const LEAVE_MS = 250;
+
+export function Reaction({ reactionKey, triggerId, onDone }) {
+  const [phase, setPhase] = useState("enter");
+  const [activeKey, setActiveKey] = useState(null);
+
+  // ⚡ مرجع ثابت لدالة onDone — عشان مش تتسبب في إعادة تشغيل الـ effect
+  const onDoneRef = useRef(onDone);
+  useEffect(() => {
+    onDoneRef.current = onDone;
+  }, [onDone]);
 
   useEffect(() => {
-    if (!reactionKey || !r) {
-      setVisible(false);
+    // لو مفيش reaction → نمسح ونخرج
+    if (!reactionKey) {
+      setActiveKey(null);
       return;
     }
-    setVisible(true);
-    const ms = duration ?? (r.big ? 2200 : 1800);
-    const timer = setTimeout(() => {
-      setVisible(false);
-      onDone?.();
-    }, ms);
-    return () => clearTimeout(timer);
-  }, [reactionKey, triggerId, r, duration, onDone]);
 
-  if (!visible || !r) return null;
+    setActiveKey(reactionKey);
+    setPhase("enter");
+
+    const holdTimer = setTimeout(() => setPhase("leave"), HOLD_MS);
+    const doneTimer = setTimeout(() => {
+      setActiveKey(null);
+      onDoneRef.current?.();
+    }, HOLD_MS + LEAVE_MS);
+
+    return () => {
+      clearTimeout(holdTimer);
+      clearTimeout(doneTimer);
+    };
+    // ⚠️ مهم جداً: onDone مش في الـ dependencies
+  }, [triggerId, reactionKey]);
+
+  if (!activeKey || !YC_REACTIONS[activeKey]) return null;
+
+  const reaction = YC_REACTIONS[activeKey];
+  const isBig = reaction.big;
 
   return (
-    <div
-      key={triggerId}
-      className={`student-reaction${r.big ? " student-reaction--big" : ""}`}
-      role="img"
-      aria-label={r.label}
-      dangerouslySetInnerHTML={{ __html: r.svg }}
-    />
+    <div className="student-reaction-container">
+      <div
+        className={`yc-reaction ${isBig ? "yc-wide" : ""} ${
+          phase === "enter" ? "yc-enter" : "yc-leave"
+        }`}
+        dangerouslySetInnerHTML={{ __html: reaction.svg }}
+      />
+    </div>
   );
 }
