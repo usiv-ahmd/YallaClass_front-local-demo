@@ -5,35 +5,28 @@ export default function LandingPage() {
   return (
     <div className="landing-container">
       <div className="landing-badge">🚀 المنصة التفاعلية الأولى</div>
-      
+
       <h1 className="landing-title">
         مرحباً بك في منصة <span>يلا كلاس</span>
       </h1>
-      
+
       <p className="landing-subtitle">
-        تجربة تعليمية حماسية تجمع بين المحاضرين والطلاب في بيئة تنافسية مليئة بالتفاعل والمكافآت المباشرة!
+        اختار هويتك عشان تبدأ — الطالب بيدخل بكود الحصة، والمدرس بيسجل دخوله.
       </p>
 
       <div className="landing-cards">
-        <div className="card landing-card">
-          <div className="landing-card-icon">👨‍🏫</div>
-          <h3>لوحة المحاضر</h3>
-          <p>عرض الأسئلة والعدادات والتنافس المباشر للطلاب مع تحكم كامل وإحصائيات للحصة.</p>
-        </div>
-
-        <div className="card landing-card">
+        <Link to="/student-dashboard" className="card landing-card landing-card--student">
           <div className="landing-card-icon">🎓</div>
-          <h3>واجهة الطالب</h3>
-          <p>إجابة سريعة، جمع نقاط السلسلة (Streak)، وفتح صناديق الهدايا والمفاجآت.</p>
-        </div>
-      </div>
-
-      <div className="auth-pages">
-        <Link to="/login">
-          <button className="btn-secondary">تسجيل الدخول</button>
+          <h3>أنا طالب</h3>
+          <p>اكتب اسمك وكود الحصة، وابدأ الإجابة مع زملائك من غير تسجيل.</p>
+          <span className="landing-card-cta">دخول كطالب ←</span>
         </Link>
-        <Link to="/register">
-          <button className="btn-primary">إنشاء حساب جديد</button>
+
+        <Link to="/login" className="card landing-card landing-card--instructor">
+          <div className="landing-card-icon">👨‍🏫</div>
+          <h3>أنا مدرس</h3>
+          <p>سجّل دخولك عشان تنشئ الحصة وتتحكم في الأسئلة والترتيب.</p>
+          <span className="landing-card-cta">دخول كمدرس ←</span>
         </Link>
       </div>
     </div>

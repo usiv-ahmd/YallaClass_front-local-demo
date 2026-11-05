@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+// hooks/useQuestionsForm.js
+import { useState } from "react";
 
 export function makeId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -14,15 +15,13 @@ export function getCorrectIndex(question) {
 
 export const QUESTION_DURATIONS = [15, 30, 45, 60, 90, 120];
 
-export default function useQuestionsForm(session) {
+export default function useQuestionsForm({ session, updateQuestions }) {
   const [formOpen, setFormOpen]         = useState(false);
   const [text, setText]                 = useState("");
   const [options, setOptions]           = useState(["", "", "", ""]);
   const [correctIndex, setCorrectIndex] = useState(0);
   const [duration, setDuration]         = useState(30);
-  const [editingId, setEditingId]       = useState(null); // ← جديد
-
-  const selectedIdRef = useRef(session?.selectedId);
+  const [editingId, setEditingId]       = useState(null);
 
   // helper: تصفير الفورم بالكامل
   function resetForm() {
@@ -34,22 +33,18 @@ export default function useQuestionsForm(session) {
     setDuration(30);
   }
 
-  useEffect(() => {
-    if (selectedIdRef.current !== session?.selectedId) {
-      selectedIdRef.current = session?.selectedId;
-      resetForm();
-    }
-  }, [session?.selectedId]);
-
-  const rawQuestions = session?.selectedSession?.questions;
+  // ── قراءة الأسئلة من الجلسة الواحدة ────────────────
+  const rawQuestions = session?.questions;
   const questions = rawQuestions
     ? Array.isArray(rawQuestions)
       ? rawQuestions
       : Object.values(rawQuestions)
     : [];
 
-  const commit = (nextQuestions) =>
-    session.updateQuestions(session.selectedId, nextQuestions);
+  // ── حفظ التعديلات على الجلسة ──────────────────────
+  const commit = (nextQuestions) => {
+    if (typeof updateQuestions === "function") updateQuestions(nextQuestions);
+  };
 
   // ── فتح الفورم لإضافة سؤال جديد ────────────────────
   function startAdd() {
@@ -62,9 +57,10 @@ export default function useQuestionsForm(session) {
     if (!question) return;
     setEditingId(question.id);
     setText(question.question ?? question.text ?? "");
-    const opts = Array.isArray(question.options) && question.options.length >= 2
-      ? [...question.options]
-      : ["", ""];
+    const opts =
+      Array.isArray(question.options) && question.options.length >= 2
+        ? [...question.options]
+        : ["", ""];
     setOptions(opts);
     setCorrectIndex(Math.max(0, getCorrectIndex(question)));
     setDuration(Number(question.duration) || 30);

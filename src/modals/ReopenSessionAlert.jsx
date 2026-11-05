@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { RotateCcw, X, Check } from "lucide-react";
+import { RotateCcw, X, Check, AlertCircle } from "lucide-react";
 
 export default function ReopenSessionAlert({
   pendingCount,
@@ -9,9 +9,16 @@ export default function ReopenSessionAlert({
   onConfirm,
 }) {
   const [allowEdit, setAllowEdit] = useState(defaultAllowEdit);
+  const [error, setError]         = useState(null);
 
   const handleConfirm = () => {
-    onConfirm(allowEdit);
+    setError(null);
+    const ok = onConfirm?.(allowEdit);
+
+    if (ok === false) {
+      setError("مقدرناش نفتح الجولة — راجع إن فيه طلاب متأخرين فعلاً وإن الجولة في حالة finished.");
+      return;
+    }
     onClose();
   };
 
@@ -37,6 +44,12 @@ export default function ReopenSessionAlert({
             مكملوش. اللي خلص خلاص مقفول عليه.
           </p>
 
+          {pendingCount === 0 && (
+            <p style={{ color: "#c53030", fontWeight: 600 }}>
+              <AlertCircle size={14} /> مفيش طلاب متأخرين — الزرار المفروض يكون disabled.
+            </p>
+          )}
+
           <label className="reopen-toggle">
             <input type="checkbox" checked={allowEdit} onChange={(e) => setAllowEdit(e.target.checked)}/>
             <span>السماح للطالب بتعديل إجابته</span>
@@ -46,6 +59,10 @@ export default function ReopenSessionAlert({
               ? "الطالب يقدر يغيّر إجابته القديمة ويكمّل الفاضي."
               : "إجاباته القديمة زي ما هي، هيكمّل الأسئلة الفاضية بس."}
           </p>
+
+          {error && (
+            <p style={{ color: "#c53030", fontSize: 13, marginTop: 8 }}>{error}</p>
+          )}
 
           <div className="modal-actions">
             <button className="button modal-button white" type="button" onClick={onClose}>

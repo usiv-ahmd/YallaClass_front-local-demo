@@ -55,48 +55,14 @@ export default function CreateSessionWindow({ onClose, onSubmit, initialData }) 
             <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="مثال: الفيزياء · الصف الثاني الثانوي" />
           </label>
 
-          <div className="create-session-fields-row">
-            <label className="create-session-field">
-              التاريخ
-              <span className="create-session-field-control">
-                <input type="date" required value={date} onChange={(e) => setDate(e.target.value)} />
-                <CalendarDays size={20} />
-              </span>
-            </label>
-
-            <label className="create-session-field">
-              الوقت
-              <span className="create-session-field-control">
-                <input type="time" required value={time} onChange={(e) => setTime(e.target.value)} />
-                <Clock3 size={20} />
-              </span>
-            </label>
-          </div>
-
-          <label className="create-session-field">
-            مدة الجلسة
-            <select value={duration} onChange={(e) => setDuration(e.target.value)}>
-              <option value="30">٣٠ دقيقة</option>
-              <option value="45">٤٥ دقيقة</option>
-              <option value="60">ساعة</option>
-              <option value="90">ساعة ونصف</option>
-            </select>
-          </label>
-
           <div className="modal-actions">
             <button className="button modal-button white" type="button" onClick={onClose}>
               إلغاء
             </button>
             
-            {!cannotBeDraft && (
-              <button className="button modal-button white" type="submit" value="draft">
-                حفظ مبدئي
-              </button>
-            )}
-            
             <button className="button modal-button turquoise" type="submit" value="scheduled">
               <CalendarDays size={16} />
-              {isEditing ? 'حفظ التعديلات' : 'حفظ الموعد'}
+              {isEditing ? 'حفظ التعديلات' : 'حفظ الحصة'}
             </button>
           </div>
         </form>

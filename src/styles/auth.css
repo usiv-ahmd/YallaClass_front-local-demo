@@ -109,3 +109,103 @@
 .auth-switch a:hover {
   text-decoration: underline;
 }
+
+
+
+
+
+
+
+
+
+
+/* Header */
+.auth-header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+.auth-header h2 {
+  margin: 6px 0 6px;
+}
+.auth-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.auth-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.1);
+  color: #7c3aed;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+/* Error */
+.auth-error {
+  color: #dc2626;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  margin-bottom: 12px;
+}
+
+/* Actions (mock + switch to student) */
+.auth-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+.mock-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px dashed rgba(124, 58, 237, 0.4);
+  background: rgba(124, 58, 237, 0.05);
+  color: #7c3aed;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .15s ease, border-color .15s ease;
+}
+.mock-btn:hover {
+  background: rgba(124, 58, 237, 0.1);
+  border-color: #7c3aed;
+}
+.mock-btn--alt {
+  border-color: rgba(8, 145, 178, 0.4);
+  background: rgba(8, 145, 178, 0.05);
+  color: #0891b2;
+}
+.mock-btn--alt:hover {
+  background: rgba(8, 145, 178, 0.1);
+  border-color: #0891b2;
+}
+
+/* Back link */
+.auth-back {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 0.82rem;
+}
+.auth-back a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #64748b;
+  text-decoration: none;
+}
+.auth-back a:hover {
+  color: #0f172a;
+}

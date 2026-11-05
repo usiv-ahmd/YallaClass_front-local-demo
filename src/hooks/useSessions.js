@@ -1,82 +1,73 @@
-import { useMemo, useState } from "react";
+// hooks/useSessions.js
+import { useState, useEffect } from "react";
+import { readSessions, upsertSession, subscribeSessions } from "../store/sessionStore";
 
-export function useSessions(initialSessions = []) {
-  const [sessionsList, setSessionsList] = useState(initialSessions);
-  const [selectedId, setSelectedId]     = useState(null);
-  const [search, setSearch]             = useState("");
-  const [filterTab, setFilterTab]       = useState("all");
-  const [isUploading, setIsUploading]   = useState(false);
+export function useSessions(initialSession = null) {
+  const [session, setSession] = useState(() => {
+    // أولوية للـ localStorage (عشان لو الطالب ضاف نفسه في تاب تاني)
+    const stored = Object.values(readSessions());
+    if (stored.length > 0) return stored[0];
 
-  const selectedSession = sessionsList.find((session) => session.id === selectedId) ?? null;
+    if (!initialSession) return null;
 
-  const filtered = useMemo(() => {
-    return sessionsList.filter((session) => {
-      const matchesSearch = session.title.toLowerCase().includes(search.toLowerCase());
-      const matchesTab =
-        filterTab === "all" ||
-        (filterTab === "upcoming"  && session.status === "scheduled") ||
-        (filterTab === "completed" && session.status === "completed") ||
-        (filterTab === "draft"     && session.status === "draft");
-      return matchesSearch && matchesTab;
-    });
-  }, [sessionsList, search, filterTab]);
-
-
-  const stats = useMemo(() => ({
-    scheduled: sessionsList.filter((session) => session.status === "scheduled").length,
-    ended:     sessionsList.filter((session) => session.status === "completed").length,
-    drafted:   sessionsList.filter((session) => session.status === "draft").length,
-    all: sessionsList.filter((session) => session.status === "scheduled").length + sessionsList.filter((session) => session.status === "completed").length + sessionsList.filter((session) => session.status === "draft").length
-  }), [sessionsList]);
-
-  const createSession = (data) => {
-    const newSession = {
-      id: `session-${Date.now()}`,
-      ...data,
-      code: `session-${Date.now().toString().slice(-4)}`,
-      studentnumber: "0",
-      students: [],
-      questions: [],
+    const normalized = {
+      id:            initialSession.id            ?? `session-${Date.now()}`,
+      code:          initialSession.code          ?? `S-${Date.now().toString().slice(-4)}`,
+      questions:     initialSession.questions     ?? [],
+      files:         initialSession.files         ?? [],
+      students:      initialSession.students      ?? [],
+      studentnumber: initialSession.studentnumber ?? 0,
+      ...initialSession,
     };
-    setSessionsList((prev) => [...prev, newSession]);
-    setSelectedId(newSession.id);
-    return newSession;
-  };
+    upsertSession(normalized);
+    return normalized;
+  });
 
-  const updateSession = (id, data) => {
-    setSessionsList((prev) =>
-      prev.map((session) => (session.id === id ? { ...session, ...data } : session))
-    );
-  };
+  const [isUploading, setIsUploading] = useState(false);
 
-  const deleteSession = (id) => {
-    setSessionsList((prev) => {
-      const next = prev.filter((session) => session.id !== id);
-      if (id === selectedId) setSelectedId(next[0]?.id ?? null);
-      return next;
+  // كل تعديل في الـ session يتكتب في الـ store
+  useEffect(() => {
+    if (session) upsertSession(session);
+  }, [session]);
+
+  // اسمع لتغييرات من تاب تاني (طالب انضم)
+  useEffect(() => {
+    return subscribeSessions((all) => {
+      const list = Object.values(all);
+      if (list.length === 0) return;
+      setSession((prev) => {
+        if (!prev) return list[0];
+        const fresh = list.find((s) => s.id === prev.id) ?? list[0];
+        // مقارنة JSON بسيطة تمنع loops
+        return JSON.stringify(prev) === JSON.stringify(fresh) ? prev : fresh;
+      });
     });
+  }, []);
+
+  const saveSession = (data) => {
+    setSession((prev) => ({
+      id:            prev?.id            ?? `session-${Date.now()}`,
+      code:          prev?.code          ?? `S-${Date.now().toString().slice(-4)}`,
+      questions:     prev?.questions     ?? [],
+      files:         prev?.files         ?? [],
+      students:      prev?.students      ?? [],
+      studentnumber: prev?.studentnumber ?? 0,
+      ...prev,
+      ...data,
+    }));
   };
 
-  const scheduleSession = (id) => {
-    setSessionsList((prev) =>
-      prev.map((session) => (session.id === id ? { ...session, status: "scheduled" } : session))
-    );
+  const resetSession = () => setSession(null);
+
+  const updateQuestions = (newQuestions) => {
+    setSession((prev) => (prev ? { ...prev, questions: newQuestions } : prev));
   };
 
-  // ── Questions ────────────────────────────────────
-  const updateQuestions = (id, newQuestions) => {
-    setSessionsList((prev) =>
-      prev.map((session) => (session.id === id ? { ...session, questions: newQuestions } : session))
-    );
-  };
-
-  // ── Files ────────────────────────────────────────
-  const uploadFile = async (file, sessionId) => {
-    if (!file || !sessionId) return;
+  const uploadFile = async (file) => {
+    if (!file) return;
     setIsUploading(true);
     try {
       await new Promise((r) => setTimeout(r, 1500));
-
       const fileId = `file-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
       const aiQuestion = {
         id: `ai-${Date.now()}`,
@@ -89,16 +80,14 @@ export function useSessions(initialSessions = []) {
         sourceFileName: file.name,
         type: "mcq",
       };
-
-      setSessionsList((prev) =>
-        prev.map((session) => {
-          if (session.id !== sessionId) return session;
-          return {
-            ...session,
-            files: [...(session.files || []), { id: fileId, name: file.name, url: `https://mock-storage.com/files/${file.name}` }],
-            questions: [...(session.questions || []), aiQuestion],
-          };
-        })
+      setSession((prev) =>
+        prev
+          ? {
+              ...prev,
+              files: [...(prev.files || []), { id: fileId, name: file.name, url: `https://mock-storage.com/files/${file.name}` }],
+              questions: [...(prev.questions || []), aiQuestion],
+            }
+          : prev
       );
     } catch (err) {
       console.error("Error uploading file:", err);
@@ -108,32 +97,24 @@ export function useSessions(initialSessions = []) {
     }
   };
 
-  const removeFile = (sessionId, idx) => {
-    setSessionsList((prev) =>
-      prev.map((session) => {
-        if (session.id !== sessionId) return session;
-        const fileToRemove = (session.files || [])[idx];
-        if (!fileToRemove) return session;
-        return {
-          ...session,
-          files: (session.files || []).filter((_, i) => i !== idx),
-          questions: fileToRemove.id
-            ? (session.questions || []).filter((q) => q.sourceFileId !== fileToRemove.id)
-            : session.questions,
-        };
-      })
-    );
+  const removeFile = (idx) => {
+    setSession((prev) => {
+      if (!prev) return prev;
+      const fileToRemove = (prev.files || [])[idx];
+      if (!fileToRemove) return prev;
+      return {
+        ...prev,
+        files: (prev.files || []).filter((_, i) => i !== idx),
+        questions: fileToRemove.id
+          ? (prev.questions || []).filter((q) => q.sourceFileId !== fileToRemove.id)
+          : prev.questions,
+      };
+    });
   };
 
   return {
-    sessionsList, setSessionsList,
-    selectedId, setSelectedId,
-    selectedSession,
-    search, setSearch,
-    filterTab, setFilterTab,
-    isUploading,
-    filtered, stats,
-    createSession, updateSession, deleteSession, scheduleSession,
+    session, setSession, isUploading,
+    saveSession, resetSession,
     updateQuestions, uploadFile, removeFile,
   };
 }

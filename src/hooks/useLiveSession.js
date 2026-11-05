@@ -2,66 +2,42 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 
 const LIVE_STATES = {
-  lobby: {
-    label: "مستنيين البداية",
-    cls: "status-ready",
-    canGoTo: ["countdown"],
-  },
-  countdown: {
-    label: "العدّ التمهيدي",
-    cls: "status-live",
-    canGoTo: ["question", "lobby"],
-  },
-  question: {
-    label: "السؤال شغّال",
-    cls: "status-live",
-    canGoTo: ["paused", "reveal"],
-  },
-  paused: {
-    label: "الحصة متوقفة",
-    cls: "status-paused",
-    canGoTo: ["question", "reveal", "finished"],
-  },
-  reveal: {
-    label: "مراجعة الإجابات",
-    cls: "status-reveal",
-    canGoTo: ["question", "finished"],
-  },
-  finished: {
-    label: "الجولة خلصت",
-    cls: "status-finished",
-        canGoTo: ["reopened"],
-  },
-  reopened: {
-    label: "مفتوح للمتأخرين",
-    cls: "status-reveal",
-    canGoTo: ["finished"],
-  },
+  lobby:     { label: "مستنيين البداية",   cls: "status-ready",    canGoTo: ["countdown"] },
+  countdown: { label: "العدّ التمهيدي",    cls: "status-live",     canGoTo: ["question", "lobby"] },
+  question:  { label: "السؤال شغّال",      cls: "status-live",     canGoTo: ["paused", "reveal", "finished"] },
+  paused:    { label: "الحصة متوقفة",      cls: "status-paused",   canGoTo: ["question", "reveal", "finished"] },
+  reveal:    { label: "مراجعة الإجابات",   cls: "status-reveal",   canGoTo: ["question", "finished"] },
+  finished:  { label: "الجولة خلصت",       cls: "status-finished", canGoTo: ["reopened"] },
+  reopened:  { label: "مفتوح للمتأخرين",   cls: "status-reveal",   canGoTo: ["finished"] },
 };
 
-export function useLiveSession(sessionsList, setSessionsList) {
-  const [isLive, setIsLive]                 = useState(false);
-  const [liveSessionId, setLiveSessionId]   = useState(null);
-  const [liveState, setLiveState]           = useState("lobby");
-  const [currentQuestionIndex, setCurrentQIdx] = useState(0);
+export function useLiveSession(session, setSession) {
+  const [isLive, setIsLive]                     = useState(false);
+  const [liveState, setLiveState]               = useState("lobby");
+  const [currentQuestionIndex, setCurrentQIdx]  = useState(0);
   const [isEndConfirmOpen, setIsEndConfirmOpen] = useState(false);
   const [timeLeft, setTimeLeft]                 = useState(0);
 
   // ── Derived ──────────────────────────────────────
-  const liveSession = sessionsList.find((s) => s.id === liveSessionId) ?? null;
-  const questions   = liveSession?.questions ?? [];
-  const totalQuestions     = questions.length;
-  const currentQuestion    = questions[currentQuestionIndex] ?? null;
-  const currentQuestionDuration = Number(currentQuestion?.duration) || 30;
-  const isLastQuestion     = currentQuestionIndex >= totalQuestions - 1;
-  const statusView         = LIVE_STATES[liveState] ?? LIVE_STATES.lobby;
+  // ✅ FIX: وحّد شكل الأسئلة سواء array أو object
+  const rawQuestions = session?.questions;
+  const questions = Array.isArray(rawQuestions)
+    ? rawQuestions
+    : rawQuestions
+      ? Object.values(rawQuestions)
+      : [];
 
-  const allowAnswerEdit = liveSession?.reopenedFor?.allowEdit ?? false;
+  const totalQuestions           = questions.length;
+  const currentQuestion          = questions[currentQuestionIndex] ?? null;
+  const currentQuestionDuration  = Number(currentQuestion?.duration) || 30;
+  const isLastQuestion           = currentQuestionIndex >= totalQuestions - 1;
+  const statusView               = LIVE_STATES[liveState] ?? LIVE_STATES.lobby;
+  const allowAnswerEdit          = session?.reopenedFor?.allowEdit ?? false;
+
+  const students       = session?.students ?? [];
+  const studentAnswers = session?.answers ?? {};
 
   // ── Students / answers ───────────────────────────
-  const students        = liveSession?.students ?? [];
-  const studentAnswers  = liveSession?.answers ?? {};
-
   const answeredCountFor = useCallback(
     (studentId) => {
       const map = studentAnswers[studentId] ?? {};
@@ -92,12 +68,12 @@ export function useLiveSession(sessionsList, setSessionsList) {
     [liveState]
   );
 
-  const canPause   = liveState === "question";
-  const canResume  = liveState === "paused";
-  const canReveal  = liveState === "question" || liveState === "paused";
-  const canNext    = liveState === "reveal";
-  const canFinish  = liveState === "paused" || liveState === "reveal" ||
-                    (liveState === "question" && isLastQuestion);
+  const canPause  = liveState === "question";
+  const canResume = liveState === "paused";
+  const canReveal = liveState === "question" || liveState === "paused";
+  const canNext   = liveState === "reveal";
+  const canFinish = liveState === "paused" || liveState === "reveal" ||
+                   (liveState === "question" && isLastQuestion);
 
   // ── Core transition ──────────────────────────────
   const goToState = useCallback(
@@ -112,7 +88,6 @@ export function useLiveSession(sessionsList, setSessionsList) {
     [liveState, canTransitionTo]
   );
 
-  // ── revealAnswer (قبل الـ effects) ─────────────
   const revealAnswer = useCallback(() => {
     if (!canReveal) return false;
     return goToState("reveal");
@@ -134,15 +109,10 @@ export function useLiveSession(sessionsList, setSessionsList) {
     revealAnswer();
   }, [liveState, timeLeft, totalQuestions, revealAnswer]);
 
-  // ── Lifecycle: بدء الجلسة ───────────────────────
-  const startLiveSession = (sessionId) => {
-    const target = sessionsList.find((s) => s.id === sessionId);
-    if (!target)                       return false;
-    if (target.status === "completed") { alert("الجلسة دي انتهت بالفعل."); return false; }
-    if (target.status === "draft")     { alert("انشرها (Schedule) الأول."); return false; }
-    if (!target.questions?.length)     { alert("ضيف سؤال واحد على الأقل."); return false; }
-
-    setLiveSessionId(sessionId);
+  // ── Lifecycle ────────────────────────────────────
+  const startLiveSession = () => {
+    if (!session)        { alert("اعمل الحصة الأول.");         return false; }
+    if (totalQuestions === 0) { alert("ضيف سؤال واحد على الأقل."); return false; }
     setIsLive(true);
     setLiveState("lobby");
     setCurrentQIdx(0);
@@ -164,15 +134,9 @@ export function useLiveSession(sessionsList, setSessionsList) {
   const pauseQuestion  = () => goToState("paused");
   const resumeQuestion = () => goToState("question");
 
-  // ── السؤال التالي ─────────────────────────────────
   const nextQuestion = () => {
     if (liveState !== "reveal") return false;
-
-    if (isLastQuestion) {
-      finishSession();
-      return true;
-    }
-
+    if (isLastQuestion) { finishSession(); return true; }
     const nextIdx = currentQuestionIndex + 1;
     const nextQ   = questions[nextIdx];
     setCurrentQIdx(nextIdx);
@@ -184,78 +148,41 @@ export function useLiveSession(sessionsList, setSessionsList) {
   // ── إنهاء الجولة ─────────────────────────────────
   const finishSession = () => {
     if (liveState !== "finished") {
-      if (!goToState("finished") && liveState !== "question") return false;
-      setLiveState("finished");
-    }
-    if (liveSessionId) {
-      setSessionsList((prev) =>
-        prev.map((s) =>
-          s.id === liveSessionId
-            ? { ...s, status: "completed", endedAt: Date.now() }
-            : s
-        )
-      );
+      if (!goToState("finished")) return false;
     }
     return true;
   };
 
   // ── إعادة فتح الجولة للمتأخرين ──────────────────
-  const confirmReopen = (allowEdit = false) => {
-    if (liveState !== "finished") return false;
-    if (pendingStudents.length === 0) return false;
-
+  // ✅ FIX: بتقبل onSuccess callback عشان الـ caller يقفل المودال لما تنجح
+  const confirmReopen = (allowEdit = false, onSuccess) => {
+    if (liveState !== "finished" || pendingStudents.length === 0) return false;
     const studentIds = pendingStudents.map((s) => s.id);
-
-    setSessionsList((prev) =>
-      prev.map((s) =>
-        s.id === liveSessionId
-          ? { ...s, reopenedFor: { at: Date.now(), allowEdit, studentIds } }
-          : s
-      )
+    setSession((prev) =>
+      prev ? { ...prev, reopenedFor: { at: Date.now(), allowEdit, studentIds } } : prev
     );
-
-    return goToState("reopened");
+    const ok = goToState("reopened");
+    if (ok && typeof onSuccess === "function") onSuccess();
+    return ok;
   };
 
   const closeReopenedRound = () => {
     if (liveState !== "reopened") return false;
-    if (liveSessionId) {
-      setSessionsList((prev) =>
-        prev.map((s) =>
-          s.id === liveSessionId ? { ...s, reopenedFor: null } : s
-        )
-      );
-    }
+    setSession((prev) => (prev ? { ...prev, reopenedFor: null } : prev));
     return goToState("finished");
   };
 
   const setAllowAnswerEdit = (value) => {
-    if (!liveSessionId) return;
-    setSessionsList((prev) =>
-      prev.map((s) =>
-        s.id === liveSessionId && s.reopenedFor
-          ? { ...s, reopenedFor: { ...s.reopenedFor, allowEdit: value } }
-          : s
-      )
+    setSession((prev) =>
+      prev?.reopenedFor
+        ? { ...prev, reopenedFor: { ...prev.reopenedFor, allowEdit: value } }
+        : prev
     );
   };
 
   // ── End confirmation ────────────────────────────
-  const _endLiveSession = ({ markCompleted = false } = {}) => {
-    if (liveSessionId) {
-      setSessionsList((prev) =>
-        prev.map((s) =>
-          s.id === liveSessionId
-            ? {
-                ...s,
-                ...(markCompleted ? { status: "completed", endedAt: Date.now() } : {}),
-                reopenedFor: null,
-              }
-            : s
-        )
-      );
-    }
-    setLiveSessionId(null);
+  const _endLiveSession = () => {
+    setSession((prev) => (prev ? { ...prev, reopenedFor: null } : prev));
     setIsLive(false);
     setLiveState("lobby");
     setCurrentQIdx(0);
@@ -264,8 +191,8 @@ export function useLiveSession(sessionsList, setSessionsList) {
 
   const requestEndLive = () => setIsEndConfirmOpen(true);
   const cancelEndLive  = () => setIsEndConfirmOpen(false);
-  const confirmEndLive = (opts) => {
-    _endLiveSession(opts);
+  const confirmEndLive = () => {
+    _endLiveSession();
     setIsEndConfirmOpen(false);
   };
 
@@ -274,11 +201,26 @@ export function useLiveSession(sessionsList, setSessionsList) {
     setLiveState("lobby");
   };
 
+  useEffect(() => {
+    setSession((prev) => {
+      if (!prev) return prev;
+      const live = {
+        isLive,
+        state: liveState,
+        currentQuestionIndex,
+        timeLeft,
+      };
+      if (prev.live && JSON.stringify(prev.live) === JSON.stringify(live)) {
+        return prev;
+      }
+      return { ...prev, live };
+    });
+  }, [isLive, liveState, currentQuestionIndex, timeLeft, setSession]);
+
+  // ── Return ──────────────────────────────────────
   return {
-    // state
     isLive,
-    liveSession,
-    liveSessionId,
+    liveSession: session,
     liveState,
     statusView,
     currentQuestion,
@@ -286,29 +228,23 @@ export function useLiveSession(sessionsList, setSessionsList) {
     totalQuestions,
     isLastQuestion,
     isEndConfirmOpen,
+    timeLeft,
+    currentQuestionDuration,
 
-    // students / answers
     students,
     pendingStudents,
     finishedStudentsCount,
     answeredCountFor,
     isStudentFinished,
 
-    // reopen
     allowAnswerEdit,
     setAllowAnswerEdit,
     confirmReopen,
     closeReopenedRound,
 
-    // guards
     canTransitionTo,
-    canPause,
-    canResume,
-    canReveal,
-    canNext,
-    canFinish,
+    canPause, canResume, canReveal, canNext, canFinish,
 
-    // transitions
     startLiveSession,
     startCountdown,
     cancelCountdown,
@@ -321,11 +257,8 @@ export function useLiveSession(sessionsList, setSessionsList) {
     goToState,
     restartRound,
 
-    // end
     requestEndLive,
     cancelEndLive,
     confirmEndLive,
-    timeLeft,
-    currentQuestionDuration,
   };
 }

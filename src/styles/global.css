@@ -143,6 +143,13 @@ body {
 .stack-card {
   gap: 14px;
 }
+.empty-card {
+  display: grid;
+  justify-items: center;
+  padding: 37px 22px;
+  background: var(--C-yalla-surface);
+  text-align: center;
+}
 .card-description {
   margin: 0;
   color: var(--C-yalla-text-secondary);
@@ -178,6 +185,11 @@ body {
 .small-card-icon {
   width: 44px;
   height: 44px;
+}
+.super-big-card-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 22px;
 }
 .card-heading-title {
   display: flex;
@@ -226,6 +238,18 @@ body {
 }
 .card-heading-title h2.modal-title {
   font-size: clamp(1.2rem, 3vw, 1.5rem)
+}
+.empty-card h2 {
+  font-family: var(--font-display);
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+  color: #fff;
+}
+.empty-card p {
+  color: var(--C-yalla-text-secondary);
+  font-size: 1rem;
+  max-width: 400px;
+  line-height: 1.6;
 }
 .count-pill {
   display: inline-flex;
@@ -462,11 +486,15 @@ button {
   background: var(--C-yalla-fg);
   color: var(--C-yalla-bg);
 }
+.color1 {
+  background: #FFD23F;
+  color: var(--C-yalla-bg);
+}
 
 .turquoise:hover {
   background: var(--C-yalla-primary-hover);
 }
-.red {
+.red:hover {
   background: var(--C-yalla-danger-hover);
 }
 .white:hover {
@@ -535,4 +563,12 @@ button {
   .page {
     padding: 14px;
   }
+}
+
+.layout {
+  display: flex;
+  gap: clamp(16px, 2.4vw, 28px);
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
 }

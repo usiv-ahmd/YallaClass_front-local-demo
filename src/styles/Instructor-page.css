@@ -50,13 +50,6 @@
   Layout
   ========================================= */
 
-.instructor-layout {
-  display: flex;
-  gap: clamp(16px, 2.4vw, 28px);
-  align-items: flex-start;
-  width: 100%;
-}
-
 .instructor-sidebar {
   position: sticky;
   top: 24px;
@@ -286,19 +279,19 @@
   color: var(--C-yalla-primary);
 }
 
-.session-tile-status.is-scheduled i { background: var(--C-yalla-primary); }
-
 .session-tile-status.is-draft {
   background: #ffd23f26;
   color: var(--C-yalla-highlight);
 }
 
-.session-tile-status.is-draft i { background: var(--C-yalla-highlight); }
-
 .session-tile-status.is-completed {
   background: #27c28126;
   color: var(--C-yalla-success);
 }
+
+.session-tile-status.is-scheduled i { background: var(--C-yalla-primary); }
+
+.session-tile-status.is-draft i { background: var(--C-yalla-highlight); }
 
 .session-tile-status.is-completed i { background: var(--C-yalla-success); }
 
@@ -380,50 +373,8 @@
 }
 
 /* =========================================
-  No Session State
-  ========================================= */
-
-.no-session-state {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 40px 24px;
-  min-height: 260px;
-  width: 100%;
-}
-
-.section-kicker {
-  color: var(--C-yalla-primary);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-.no-session-state h2 {
-  margin: 4px 0 0;
-  color: var(--C-yalla-fg);
-  font-family: var(--font-display);
-  font-size: clamp(1.2rem, 2.2vw, 1.5rem);
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.no-session-state p {
-  margin: 0 0 12px;
-  color: var(--C-yalla-text-secondary);
-  font-size: 0.88rem;
-  font-weight: 600;
-  line-height: 1.7;
-}
-
-/* =========================================
   Selected Session Header
   ========================================= */
-
-.selected-session-header-card {
-  display: flex;
-  flex-direction: column;
-}
 
 .status-dot {
   display: inline-block;
@@ -445,24 +396,9 @@
   box-shadow: 0 0 0 2px rgba(39, 194, 129, 0.25);
 }
 
-.session-title-block p {
-  margin: 0;
-  color: var(--C-yalla-text-secondary);
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
 /* =========================================
   Header Actions
   ========================================= */
-
-.selected-session-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
 
 .overview-status {
   display: inline-flex;
@@ -498,12 +434,13 @@
     color 0.12s ease;
 }
 
-.delete-session-button {
+.open-delete-modal-button {
   color: var(--C-yalla-danger);
 }
-.delete-session-button:hover {
+.open-delete-modal-button:hover {
   background: var(--C-yalla-danger-Sdark-hover);
 }
+
 .session-meta-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -557,7 +494,7 @@
   text-overflow: ellipsis;
 }
 
-.session-meta-settings {
+.open-edit-modal-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -695,7 +632,7 @@
   gap: 12px;
 }
 
-.questions-flex .questions-panel .question-list {
+.questions-flex .question-list {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
 }
@@ -726,14 +663,6 @@
   line-height: 1;
 }
 
-.question-number.manual-source  {
-  background: var(--C-yalla-highlight);
-}
-
-.question-number.ai-source  {
-  background: var(--C-yalla-info);
-}
-
 .source-label {
   display: inline-flex;
   align-items: center;
@@ -752,16 +681,6 @@
   height: 6px;
   border-radius: 50%;
   background: currentColor;
-}
-
-.source-label.manual-source  {
-  background: rgba(255, 210, 63, 0.12);
-  color: var(--C-yalla-highlight);
-}
-
-.source-label.ai-source  {
-  background: rgba(47, 128, 237, 0.12);
-  color: var(--C-yalla-info);
 }
 
 .duration-badge {
@@ -786,7 +705,7 @@
   margin-inline-start: auto;
 }
 
-.edit-question-button {
+.edit-question-modal-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -801,10 +720,10 @@
   cursor: pointer;
   transition: background 0.15s ease;
 }
-.edit-question-button:hover {
+.edit-question-modal-button:hover {
   background: rgba(20, 184, 166, 0.1);
 }
-.delete-question-button {
+.delete-question-modal-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -816,20 +735,12 @@
   border-radius: 8px;
   color: var(--C-yalla-danger);
 }
-.delete-question-button:hover {
+.delete-question-modal-button:hover {
   background: var(--C-yalla-danger-Sdark-hover);
 }
-.delete-question-button:active,.edit-question-button:active {
+.delete-question-modal-button:active,.edit-question-modal-button:active {
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0 var(--C-yalla-bg);
-}
-
-.question-field h3 {
-  margin: 0;
-  color: var(--C-yalla-fg);
-  font-size: 0.95rem;
-  font-weight: 700;
-  line-height: 1.5;
 }
 
 .question-options-preview {
@@ -910,7 +821,7 @@
   font-weight: 600;
 }
 
-.open-question-form-button {
+.open-question-modal-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1167,146 +1078,109 @@
   margin-top: 10px;
 }
 
-/* =========================================
-  Leaderboard Specifics
-  ========================================= */
-.leaderboard-table {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.attendance-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  table-layout: fixed;
 }
 
-.leaderboard-row {
-  display: grid;
-  grid-template-columns: 50px minmax(100px, 1fr) minmax(80px, 1fr) minmax(100px, 1fr);
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
+.attendance-table th {
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--C-yalla-text-tertiary);
+  text-align: center;
+  border-bottom: 2px dashed rgba(2, 9, 13, 0.6);
+  white-space: nowrap;
+}
+
+.attendance-table th.col-name {
+  text-align: right;
+}
+
+.attendance-table td {
+  padding: 12px 10px;
   background: rgba(255, 255, 255, 0.03);
-  border-radius: 12px;
-  border: 2px solid transparent;
-  transition: background-color 0.2s ease;
+  text-align: center;
   height: 50px;
+  transition: background-color 0.2s ease;
 }
 
-.leaderboard-row:not(.leaderboard-row--head):hover {
+.attendance-table tbody tr:hover td {
   background: rgba(255, 255, 255, 0.06);
 }
 
-.leaderboard-row--head {
-  background: transparent;
-  border-radius: 0;
-  padding-block: 8px;
-  border-bottom: 2px dashed rgba(2, 9, 13, 0.6);
-  color: var(--C-yalla-text-tertiary);
-  font-size: 0.8rem;
-  font-weight: 700;
-  min-height: 40px;
+/* Rounded rows — using logical properties for RTL */
+.attendance-table tbody tr td:first-child {
+  border-start-start-radius: 12px;
+  border-end-start-radius: 12px;
 }
 
-.leaderboard-row:nth-child(2) .col-rank { color: var(--C-yalla-highlight); font-size: 1.2rem; text-shadow: 0 0 8px rgba(255, 210, 63, 0.5); }
-.leaderboard-row:nth-child(3) .col-rank { color: #C0C0C0; font-size: 1.1rem; }
-.leaderboard-row:nth-child(4) .col-rank { color: #CD7F32; font-size: 1.1rem; }
+.attendance-table tbody tr td:last-child {
+  border-start-end-radius: 12px;
+  border-end-end-radius: 12px;
+}
 
-.col-rank {
+/* Column widths */
+.attendance-table .col-rank      { width: 44px; }
+.attendance-table .col-name      { text-align: right; }
+.attendance-table .col-correct   { width: 80px; }
+.attendance-table .col-wrong     { width: 80px; }
+.attendance-table .col-attended  { width: 80px; }
+.attendance-table .col-interacted{ width: 80px; }
+.attendance-table .col-score     { width: 90px; }
+.attendance-table .col-streak    { width: 100px; }
+
+/* Rank colors */
+.attendance-table td.col-rank {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 1rem;
   color: var(--C-yalla-text-secondary);
-  text-align: center;
 }
 
-.leaderboard-row .col-name {
+.attendance-table tbody tr:nth-child(1) .col-rank {
+  color: var(--C-yalla-highlight);
+  font-size: 1.2rem;
+  text-shadow: 0 0 8px rgba(255, 210, 63, 0.5);
+}
+
+.attendance-table tbody tr:nth-child(2) .col-rank {
+  color: #c0c0c0;
+  font-size: 1.1rem;
+}
+
+.attendance-table tbody tr:nth-child(3) .col-rank {
+  color: #cd7f32;
+  font-size: 1.1rem;
+}
+
+/* Correct / Wrong */
+.attendance-table .col-correct {
+  color: var(--C-yalla-success);
   font-weight: 700;
-  color: var(--C-yalla-fg);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.col-score {
+.attendance-table .col-wrong {
+  color: var(--C-yalla-danger);
+  font-weight: 700;
+}
+
+/* Score / Streak */
+.attendance-table .col-score {
   font-family: var(--font-display);
   color: var(--C-yalla-primary);
   font-weight: 700;
-  text-align: center;
 }
 
-.col-streak {
+.attendance-table .col-streak {
   color: var(--C-yalla-danger);
   font-weight: 700;
   font-size: 0.9rem;
-  text-align: center;
 }
 
-/* =========================================
-  Attendance Board Specifics
-  ========================================= */
-
-.attendance-table {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.attendance-row {
-  display: grid;
-  grid-template-columns: minmax(120px, 2fr) minmax(60px, 1fr) minmax(60px, 1fr) minmax(70px, 1fr) minmax(70px, 1fr);
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 12px;
-  border: 2px solid transparent;
-  transition: background-color 0.2s ease;
-  height: 50px;
-}
-
-.attendance-row:not(.attendance-row--head):hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.attendance-row--head {
-  background: transparent;
-  border-radius: 0;
-  padding-block: 8px;
-  border-bottom: 2px dashed rgba(2, 9, 13, 0.6);
-  color: var(--C-yalla-text-tertiary);
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-align: center;
-  min-height: 40px;
-}
-
-.attendance-row--head .col-name {
-  text-align: right;
-}
-
-.attendance-row .col-name {
-  font-weight: 700;
-  color: var(--C-yalla-fg);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.col-correct {
-  color: var(--C-yalla-success);
-  font-weight: 700;
-  text-align: center;
-}
-
-.col-wrong {
-  color: var(--C-yalla-danger);
-  font-weight: 700;
-  text-align: center;
-}
-
-.col-attended,
-.col-interacted {
-  display: flex;
-  justify-content: center;
-}
-
+/* Check circles */
 .check {
   display: inline-flex;
   align-items: center;
@@ -1319,16 +1193,24 @@
   border: 2px solid transparent;
 }
 
-.check--yes {
+.check-yes {
   background: rgba(39, 194, 129, 0.15);
   color: var(--C-yalla-success);
   border-color: rgba(39, 194, 129, 0.3);
 }
 
-.check--no {
+.check-no {
   background: rgba(255, 90, 95, 0.15);
   color: var(--C-yalla-danger);
   border-color: rgba(255, 90, 95, 0.3);
+}
+
+.attendance-table .col-name {
+  font-weight: 700;
+  color: var(--C-yalla-fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* =========================================

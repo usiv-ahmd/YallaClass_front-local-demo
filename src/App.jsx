@@ -4,7 +4,6 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import InstructorView from './pages/InstructorView';
 import StudentView from './pages/StudentView';
-
 import Loading from './Components/Loading';
 
 function App() {
