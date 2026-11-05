@@ -1,3 +1,6 @@
+/* ============================================================
+   1. Layout & Container
+   ============================================================ */
 .student-sidebar {
   position: sticky;
   top: 24px;
@@ -9,8 +12,9 @@
   gap: clamp(14px, 2vw, 20px);
 }
 
-
-
+/* ============================================================
+   2. Auth / Join Form
+   ============================================================ */
 .join-form {
   display: flex;
   flex-direction: column;
@@ -26,15 +30,191 @@
   flex: 0 0 auto;
 }
 
-/* ========== Sessions Grid (Container) ========== */
+.auth-back {
+  display: block;
+  text-align: center;
+  font-size: 12px;
+  color: var(--C-yalla-text-secondary, #9DB6BF);
+  margin-top: 8px;
+}
+
+.auth-back a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.auth-back a:hover {
+  color: var(--C-yalla-primary, #0FB5A6);
+}
+
+/* ============================================================
+   3. Live View States (lobby, countdown, finished)
+   ============================================================ */
+.live-lobby,
+.live-finished {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.live-lobby h2,
+.live-finished h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  color: var(--C-yalla-fg, #0B1F2A);
+}
+
+.live-lobby p,
+.live-finished p {
+  margin: 0;
+  color: var(--C-yalla-text-secondary, #9DB6BF);
+  max-width: 340px;
+  font-size: 14px;
+}
+
+.live-lobby-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(15, 181, 166, 0.15);
+  color: var(--C-yalla-primary, #0FB5A6);
+  margin-bottom: 4px;
+}
+
+.live-lobby-pulse {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--C-yalla-primary, #0FB5A6);
+  animation: lobbyPulse 1.4s ease-in-out infinite;
+}
+
+.live-countdown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 20px;
+  text-align: center;
+}
+
+.live-countdown-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(255, 210, 63, 0.2);
+  color: #8B6914;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.live-countdown-number {
+  font-family: var(--font-display);
+  font-size: 96px;
+  font-weight: 800;
+  color: var(--C-yalla-primary, #0FB5A6);
+  line-height: 1;
+  animation: countdownPop 1s ease-out;
+}
+
+.live-countdown p {
+  margin: 0;
+  color: var(--C-yalla-text-secondary, #9DB6BF);
+}
+
+.live-finished {
+  color: var(--C-yalla-fg, #0B1F2A);
+}
+
+.live-finished svg {
+  color: var(--C-yalla-highlight, #FFD23F);
+}
+
+.live-finished p b {
+  color: var(--C-yalla-primary, #0FB5A6);
+}
+
+/* ============================================================
+   4. Session Status Banners
+   ============================================================ */
+
+/* Base (outside card — used in ReopenedView banner) */
+.session-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font: 700 12px var(--font-display);
+  border: 2px solid;
+  margin-bottom: 14px;
+}
+
+.session-status i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.session-status.status-reveal {
+  background: rgba(15, 181, 166, 0.15);
+  color: #0FB5A6;
+  border-color: #0FB5A6;
+}
+
+.session-status.status-paused {
+  background: rgba(255, 210, 63, 0.2);
+  color: #8B6914;
+  border-color: #FFD23F;
+}
+
+/* Inside question card — brutalism style override */
+.student-question .session-status {
+  display: flex;
+  gap: 10px;
+  padding: 10px 16px;
+  background: #FFD23F;
+  color: #0B1F2A;
+  border: 3px solid #02090D;
+  border-radius: 14px;
+  box-shadow: 0 4px 0 #02090D;
+  font: 700 14px var(--font-display);
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.student-question .session-status i {
+  width: 10px;
+  height: 10px;
+  background: #FF5A5F;
+  animation: statusBlink 1.2s ease-in-out infinite;
+}
+
+/* ============================================================
+   5. Session Cards (grid + field) — kept for compatibility
+   ============================================================ */
 .session-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: clamp(16px, 2.4vw, 24px);
   width: 100%;
 }
-
-/* ========== Session Card ========== */
 
 .session-field {
   gap: 18px;
@@ -48,7 +228,6 @@
   flex-wrap: wrap;
 }
 
-/* شارة "خلصت" / "مسجل" */
 .session-field .session-status {
   display: inline-flex;
   align-items: center;
@@ -62,6 +241,7 @@
   font-weight: 700;
   font-family: var(--font-display);
   line-height: 1.2;
+  margin-bottom: 0;
 }
 
 .session-field .session-status > span {
@@ -72,7 +252,6 @@
   flex: 0 0 auto;
 }
 
-/* كود الجلسة */
 .session-field .session-code {
   font-family: var(--font-display);
   background: var(--C-yalla-fg);
@@ -251,7 +430,7 @@
   white-space: nowrap;
 }
 
-.material-file__copy small {
+.material-file-copy small {
   color: var(--C-yalla-text-tertiary);
   font-size: 0.7rem;
   font-weight: 600;
@@ -358,7 +537,9 @@
   white-space: nowrap;
 }
 
-/* ================= Student Live Stats ================= */
+/* ============================================================
+   6. Student Live Stats (legacy)
+   ============================================================ */
 .student-live-stats {
   display: flex;
   flex-wrap: wrap;
@@ -383,17 +564,8 @@
 .student-live-stats svg { color: var(--C-yalla-primary); }
 
 /* ============================================================
-   Student Question Card — Phone-inspired (from demo)
+   7. Student Question Card — Neo-brutalism / Phone style
    ============================================================ */
-
-/* Container — بيتحول لـ phone */
-.student-question .answer-result small {
-  display: block;
-  margin-top: 2px;
-  opacity: .75;
-  font-family: var(--font-body);
-  font-weight: 600;
-}
 .student-question {
   --heat: #0FB5A6;
   position: relative;
@@ -424,7 +596,7 @@
   z-index: 2;
 }
 
-/* ── HUD (top pills) ─────────────────────────── */
+/* ── Top meta row ── */
 .student-question .question-meta-row {
   display: flex;
   justify-content: space-between;
@@ -432,6 +604,8 @@
   gap: 6px;
   flex-wrap: wrap;
 }
+
+/* ── Mini-label & session pill ── */
 .student-question .question-meta-row .mini-label,
 .student-question .question-session {
   background: #fff;
@@ -445,12 +619,50 @@
   font: 700 14px var(--font-display);
   color: #0B1F2A;
 }
+
+/* ── Greeting + Session title ── */
+.student-question .question-header-title {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #fff;
+  border: 3px solid #02090D;
+  border-radius: 12px;
+  padding: 4px 16px;
+  box-shadow: 0 3px 0 #02090D;
+  flex: 1 1 auto;
+  max-width: max-content;
+  min-width: 0;
+  margin: 0 4px;
+}
+.student-question .question-header-title span {
+  font: 700 11px var(--font-body);
+  color: #4A5B66;
+  line-height: 1.2;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.student-question .question-header-title h2 {
+  font: 700 15px var(--font-display);
+  color: #0B1F2A;
+  margin: 0;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+/* ── Stat chips row ── */
 .student-question .question-stats {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
 }
 .student-question .stat-chip {
+  --chip-fg: #0B1F2A;
   background: #fff;
   border: 3px solid #02090D;
   border-radius: 12px;
@@ -461,13 +673,17 @@
   align-items: center;
   gap: 4px;
   font: 700 14px var(--font-display);
-  color: #0B1F2A;
+  color: var(--chip-fg);
 }
-.student-question .stat-chip svg { color: #0B1F2A; }
-.student-question .stat-chip small { color: #0B1F2A; opacity: .7; font-size: .78em; }
-.student-question .stat-chip--streak { background: linear-gradient(#FFD23F, #FF5A5F); }
+.student-question .stat-chip svg { color: var(--chip-fg); }
+.student-question .stat-chip small { color: var(--chip-fg); opacity: .7; font-size: .78em; }
+.student-question .stat-chip--streak {
+  background: linear-gradient(#FFD23F, #FF5A5F);
+}
+.student-question .stat-chip--correct { --chip-fg: #10b981; }
+.student-question .stat-chip--wrong   { --chip-fg: #ef4444; }
 
-/* ── Heat bars ───────────────────────────────── */
+/* ── Progress heat bars ── */
 .student-question .question-progress {
   display: flex;
   gap: 5px;
@@ -490,7 +706,7 @@
   animation: stuPulse .8s infinite;
 }
 
-/* ── Question main row ───────────────────────── */
+/* ── Question text + timer ── */
 .student-question .question-main-row {
   display: flex;
   align-items: stretch;
@@ -517,7 +733,7 @@
   color: #0B1F2A;
 }
 
-/* ── Timer ring (restyled with demo colors) ─── */
+/* ── Timer ring ── */
 .student-question .timer-ring {
   --timer-angle: 0deg;
   position: relative;
@@ -551,7 +767,7 @@
 .student-question .timer-ring__inner small  { font-size: 10px; opacity: .7; }
 .student-question .timer-ring__inner svg    { color: #FFD23F; }
 
-/* ── Answer prompt ───────────────────────────── */
+/* ── Answer prompt ── */
 .student-question .answer-prompt {
   display: inline-flex;
   align-items: center;
@@ -567,7 +783,7 @@
 }
 .student-question .answer-prompt svg { color: #FF5A5F; }
 
-/* ── Answers grid (EXACT phone look) ─────────── */
+/* ── Answers grid ── */
 .student-question .answer-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -590,7 +806,6 @@
   text-align: center;
   background: #0FB5A6;
 }
-/* الألوان بالترتيب زي الديمو */
 .student-question .answer-option:nth-child(1),
 .student-question .answer-option--turquoise { background: #FF5A5F; color: #fff; }
 .student-question .answer-option:nth-child(2),
@@ -613,6 +828,12 @@
   outline: 4px solid #fff;
   outline-offset: 2px;
   animation: stuPulse .5s 2;
+}
+.student-question .answer-option.answer-option--correct {
+  background: #27C281;
+}
+.student-question .answer-option.answer-option--wrong {
+  background: #FF5A5F;
 }
 .student-question .answer-option.answer-option--wrong {
   background: #FF5A5F !important;
@@ -637,7 +858,7 @@
 }
 .student-question .answer-option__text { flex: 1; min-width: 0; }
 
-/* ── Waiting state / Result card ─────────────── */
+/* ── Answer result card ── */
 .student-question .answer-result {
   margin-top: 12px;
   padding: 12px 14px;
@@ -683,9 +904,33 @@
   opacity: .75;
   font-family: var(--font-body);
   font-weight: 600;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
-/* ── Muted note (readOnly reveal) ────────────── */
+.student-question .answer-result > span:not(.answer-result__icon) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 2px;
+}
+
+.student-question .answer-result--good {
+  background: #E8F9F1;
+  border-color: #1B9A64;
+}
+.student-question .answer-result--good strong { color: #1B9A64; }
+.student-question .answer-result--good small  { color: #1B9A64; opacity: .85; }
+
+.student-question .answer-result--retry {
+  background: #FFF0F0;
+  border-color: #D63F44;
+}
+.student-question .answer-result--retry strong { color: #D63F44; }
+.student-question .answer-result--retry small  { color: #D63F44; opacity: .85; }
+
+/* ── Muted note inside card ── */
 .student-question .muted {
   background: #ffffffcc;
   color: #0B1F2A;
@@ -697,56 +942,7 @@
   margin-top: 12px;
 }
 
-@keyframes stuPulse {
-  40% { transform: scale(1.08); }
-}
-
-/* ============================================================
-   Question Card — ADDITIONS ONLY
-   (استكمال الناقص فقط — الستايلات الموجودة زي ما هي)
-   ============================================================ */
-
-/* 1. الـ span الداخلي في .answer-result (كان بدون كلاس) */
-.student-question .answer-result > span:not(.answer-result__icon) {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-width: 0;
-  gap: 2px;
-}
-
-/* 2. answer-result--good (إجابة صح) — كان مفيش rule ليها */
-.student-question .answer-result--good {
-  background: #E8F9F1;
-  border-color: #1B9A64;
-}
-.student-question .answer-result--good strong {
-  color: #1B9A64;
-}
-.student-question .answer-result--good small {
-  color: #1B9A64;
-  opacity: .85;
-}
-
-/* 3. answer-result--retry (إجابة غلط) — كان بيغيّر الأيقونة بس */
-.student-question .answer-result--retry {
-  background: #FFF0F0;
-  border-color: #D63F44;
-}
-.student-question .answer-result--retry strong {
-  color: #D63F44;
-}
-.student-question .answer-result--retry small {
-  color: #D63F44;
-  opacity: .85;
-}
-
-/* 4. small — كان بدون font-size صريح */
-.student-question .answer-result small {
-  font-size: 12px;
-  line-height: 1.45;
-}
-
+/* ── Card-heading stats (leaderboard top-level chips) ── */
 .card-heading .question-stats {
   display: flex;
   gap: 6px;
@@ -778,13 +974,9 @@
   background: linear-gradient(#FFD23F, #FF5A5F);
 }
 
-
 /* ============================================================
-   Leaderboard aside — Screen-inspired styling
-   (based on demo .screen visual language)
+   8. Leaderboard Sidebar
    ============================================================ */
-
-/* ── Leaderboard header ──────────────────────── */
 .instructor-sidebar .leaderboard-header {
   display: flex;
   justify-content: space-between;
@@ -822,7 +1014,6 @@
   filter: drop-shadow(0 2px 0 #02090D);
 }
 
-/* ── LIVE chip ───────────────────────────────── */
 .instructor-sidebar .live-chip {
   display: inline-flex;
   align-items: center;
@@ -846,12 +1037,7 @@
   animation: lbPulse 1.4s infinite;
   flex: 0 0 auto;
 }
-@keyframes lbPulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50%      { transform: scale(.6); opacity: .5; }
-}
 
-/* ── Your rank card (white box) ──────────────── */
 .instructor-sidebar .your-rank-card {
   display: flex;
   align-items: center;
@@ -904,7 +1090,6 @@
   opacity: .85;
 }
 
-/* ── Avatar ──────────────────────────────────── */
 .instructor-sidebar .student-avatar {
   display: inline-flex;
   align-items: center;
@@ -920,7 +1105,6 @@
   box-shadow: 0 2px 0 #02090D;
 }
 
-/* ── Podium ──────────────────────────────────── */
 .instructor-sidebar .podium {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -978,9 +1162,6 @@
   animation: lbCrown 1s ease-in-out infinite;
   z-index: 2;
 }
-@keyframes lbCrown {
-  50% { transform: translateX(-50%) translateY(-3px) scale(1.1); }
-}
 .instructor-sidebar .podium-card__name {
   font: 700 12px var(--font-display);
   max-width: 100%;
@@ -1012,7 +1193,6 @@
   box-shadow: 0 2px 0 #02090D;
 }
 
-/* ── Ranking heading ─────────────────────────── */
 .instructor-sidebar .ranking-list-heading {
   display: flex;
   justify-content: space-between;
@@ -1029,7 +1209,6 @@
   font-size: 11px;
 }
 
-/* ── Ranking list rows ───────────────────────── */
 .instructor-sidebar .ranking-list {
   list-style: none;
   margin: 0;
@@ -1101,7 +1280,6 @@
   margin-inline-end: 4px;
 }
 
-/* ── Footer ──────────────────────────────────── */
 .instructor-sidebar .leaderboard-footer {
   display: flex;
   align-items: center;
@@ -1121,42 +1299,413 @@
   color: #FFD23F;
 }
 
-
 /* ============================================================
-   Question Header Title (Greeting & Session Name)
+   9. Modals (Name Warning, etc.)
    ============================================================ */
-.student-question .question-header-title {
+.opened-window-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(11, 31, 42, 0.85);
+  backdrop-filter: blur(4px);
+}
+
+.modal-window {
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  padding: 24px;
   display: flex;
   flex-direction: column;
+  gap: 20px;
+  position: relative;
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--C-yalla-fg, #0B1F2A);
+  margin: 0;
+}
+
+.modal-close-button {
+  background: transparent;
+  border: 2px solid rgba(11, 31, 42, 0.15);
+  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
+  cursor: pointer;
+  color: var(--C-yalla-fg, #0B1F2A);
+  transition: all .15s ease;
+}
+
+.modal-close-button:hover {
+  background: rgba(11, 31, 42, 0.06);
+  border-color: rgba(11, 31, 42, 0.3);
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-content p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--C-yalla-tint);
+  margin: 0;
+}
+
+.name-warning-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.name-warning-form label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--C-yalla-fg, #0B1F2A);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.modal-button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+/* ============================================================
+   10. Utilities
+   ============================================================ */
+
+/* Base muted (used outside card, e.g. reopened hint) */
+.muted {
+  color: #9DB6BF;
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+
+.reopened-hint {
+  margin-top: 6px;
+}
+
+.reopened-start-btn {
+  margin-top: 12px;
+}
+
+.leave-session-btn {
+  margin-top: 8px;
+}
+
+/* Error alert */
+.error-alert {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 8px;
+  color: #c53030;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  animation: errorShake 0.35s ease-in-out;
+}
+.error-alert svg {
+  flex-shrink: 0;
+  position: static !important;
+  background-color: transparent !important;
+  color: #c53030;
+}
+
+/* ============================================================
+   11. Keyframes
+   ============================================================ */
+@keyframes stuPulse {
+  40% { transform: scale(1.08); }
+}
+
+@keyframes lbPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(.6); opacity: .5; }
+}
+
+@keyframes lbCrown {
+  50% { transform: translateX(-50%) translateY(-3px) scale(1.1); }
+}
+
+@keyframes statusBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .4; transform: scale(.7); }
+}
+
+@keyframes lobbyPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.4); opacity: .4; }
+}
+
+@keyframes countdownPop {
+  0%   { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-5px); }
+  40%      { transform: translateX(5px); }
+  60%      { transform: translateX(-3px); }
+  80%      { transform: translateX(3px); }
+}
+
+/* ============================================================
+   12. Media Queries
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .button-primary { transition: none; }
+  .live-lobby-pulse,
+  .live-countdown-number,
+  .student-question .question-progress__step.is-current,
+  .student-question .answer-result::after,
+  .student-question .session-status i {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .page {
+    padding: 14px;
+  }
+  .student-question .question-header-title {
+    max-width: 100%;
+    margin: 0;
+  }
+  .student-question .question-header-title h2 {
+    max-width: 100%;
+  }
+}
+
+
+
+/* ============================================================
+   Question Card — Live State Variants
+   (زيادة على data-heat، مش بديل)
+   ============================================================ */
+
+/* Paused — إطار أصفر + هالة */
+/* ============================================================
+   Question Card — Live State Variants
+   (زيادة على data-heat، مش بديل)
+   ============================================================ */
+
+/* ============================================================
+   Question Card — State-based Visual Changes
+   (فوق الـ data-heat الأساسي)
+   ============================================================ */
+
+/* حدّث الـ transition عشان يشمل الـ box-shadow */
+.student-question {
+  transition: background .6s, box-shadow .3s, filter .3s;
+}
+
+/* ── 1. Paused: الخلفية تصفر + فلتر خفيف ── */
+.student-question[data-live-state="paused"] {
+  --heat: #FFD23F;
+  color: #0B1F2A;
+  filter: saturate(0.85);
+  box-shadow:
+    0 6px 0 #02090D,
+    0 0 0 4px #FFD23F,
+    0 0 28px rgba(255, 210, 63, 0.55);
+}
+
+/* ── 2. Reveal: إطار أخضر (صح) أو أحمر (غلط) ── */
+.student-question[data-live-state="reveal"][data-answer-state="correct"] {
+  box-shadow:
+    0 6px 0 #02090D,
+    0 0 0 4px #2f80ed,
+    0 0 28px rgba(39, 194, 129, 0.6);
+}
+
+.student-question[data-live-state="reveal"][data-answer-state="wrong"] {
+  box-shadow:
+    0 6px 0 #02090D,
+    0 0 0 4px #FF5A5F,
+    0 0 28px rgba(255, 90, 95, 0.6);
+}
+
+/* ── 3. لما الطالب يجاوب (بغض النظر عن live state) ── */
+/* صح → خلفية خضراء */
+.student-question[data-answer-state="correct"] {
+  --heat: #2f80ed;
+}
+
+/* غلط → خلفية حمراء */
+.student-question[data-answer-state="wrong"] {
+  --heat: #0fb5a6;
+}
+.student-question[data-answer-state="pause"] {
+  --heat: #FFD23F;
+}
+
+/* نبضة سريعة عند الإجابة الصح */
+.student-question[data-answer-state="correct"] {
+  animation: answerCorrectPulse 0.5s ease-out 1;
+}
+
+/* اهتزاز سريع عند الإجابة الغلط */
+.student-question[data-answer-state="wrong"] {
+  animation: answerWrongShake 0.4s ease-out 1;
+}
+
+@keyframes answerCorrectPulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.015); }
+  100% { transform: scale(1); }
+}
+
+@keyframes answerWrongShake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-6px); }
+  40%      { transform: translateX(6px); }
+  60%      { transform: translateX(-3px); }
+  80%      { transform: translateX(3px); }
+}
+
+/* ============================================================
+   Student Question — State views (inside the SAME card)
+   ============================================================ */
+
+/* الحاوية الداخلية للـ states (lobby / countdown / finished / reopen-start) */
+.student-question-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px 10px;
+  min-height: 280px;
+  text-align: center;
+  color: #0B1F2A;
+}
+
+.student-question-state h2 {
+  margin: 0;
+  font: 700 22px var(--font-display);
+  color: #0B1F2A;
+}
+
+.student-question-state p {
+  margin: 0;
+  font: 600 14px var(--font-body);
+  color: rgba(11, 31, 42, 0.75);
+  max-width: 360px;
+}
+
+.student-question-state p b {
+  color: #0B1F2A;
+  font-weight: 800;
+}
+
+/* أيقونة دائرية بيضاء */
+.student-question-state .state-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
   background: #fff;
   border: 3px solid #02090D;
-  border-radius: 12px;
-  padding: 4px 16px;
-  box-shadow: 0 3px 0 #02090D;
-  flex: 1 1 auto; /* ياخد المساحة اللي في النص */
-  max-width: max-content; /* عشان ميتفردش على حساب باقي العناصر */
-  min-width: 0;
-  margin: 0 4px; /* مسافة صغيرة بينه وبين الـ mini-label والـ stats */
-}
-
-.student-question .question-header-title span {
-  font: 700 11px var(--font-body);
-  color: #4A5B66; /* لون رمادي غامق للترحيب */
-  line-height: 1.2;
-  margin-bottom: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.student-question .question-header-title h2 {
-  font: 700 15px var(--font-display);
+  box-shadow: 0 4px 0 #02090D;
   color: #0B1F2A;
-  margin: 0;
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 200px; /* عشان لو اسم الحصة طويل ميبوظش الشكل */
+  margin-bottom: 6px;
+}
+
+/* نقطة pulse */
+.student-question-state .state-pulse {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #0B1F2A;
+  animation: lobbyPulse 1.4s ease-in-out infinite;
+  margin-top: 4px;
+}
+
+/* Countdown badge + number */
+.student-question-state .countdown-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #fff;
+  border: 3px solid #02090D;
+  box-shadow: 0 3px 0 #02090D;
+  border-radius: 12px;
+  font: 700 12px var(--font-display);
+  color: #0B1F2A;
+}
+
+.student-question-state .countdown-number {
+  font: 800 clamp(60px, 15vw, 96px) var(--font-display);
+  color: #0B1F2A;
+  line-height: 1;
+  text-shadow: 0 3px 0 #ffffff80;
+  animation: countdownPop 1s ease-out;
+}
+
+/* الزر جوه state (زي "ابدأ السؤال" في reopen) */
+.student-question-state .button {
+  margin-top: 8px;
+}
+
+/* Hint الناعم */
+.student-question-state .state-hint,
+.student-question-state .muted {
+  color: rgba(11, 31, 42, 0.6);
+  font-size: 12px;
+  margin: 4px 0 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ── خلفيات مميزة حسب data-live-state ── */
+.student-question[data-live-state="countdown"] {
+  --heat: #FF9F1C; /* برتقالي — استعداد */
+}
+
+.student-question[data-live-state="finished"] {
+  --heat: #27C281; /* أخضر — نجاح */
 }

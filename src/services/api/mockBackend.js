@@ -308,6 +308,7 @@ export const mockLiveApi = {
     timeLeft: 0,
     startedAt: null,
     pausedAt: null,
+    autoAdvance: true,
   })),
   startCountdown:  live(() => ({ state: "countdown" })),
   cancelCountdown: live(() => ({ state: "lobby" })),
@@ -457,7 +458,22 @@ export const mockLiveApi = {
       })
     );
   },
+
+  setAutoAdvance: async (sessionId, autoAdvance) => {
+    const all = readMock();
+    const s = all[sessionId];
+    if (!s) return delay(null);
+    return delay(
+      save({
+        ...s,
+        live: { ...(s.live || {}), autoAdvance: !!autoAdvance },
+      })
+    );
+  },
+  
 };
+
+
 
 // ── Seed أول مرة — نـ stamp المدرس الحالي ─────────
 export async function bootstrapMock() {

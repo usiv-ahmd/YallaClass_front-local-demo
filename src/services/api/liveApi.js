@@ -1,3 +1,4 @@
+// src/services/api/liveApi.js
 import { http } from "./client";
 import { EP } from "./endpoints";
 
@@ -17,4 +18,5 @@ export const liveApi = {
   closeReopened:   P(EP.liveCloseReopened),
   end:             P(EP.liveEnd),
   setAllowEdit:    (id, allowEdit) => http.patch(EP.liveAllowEdit(id), { allowEdit }),
+  setAutoAdvance:  (id, autoAdvance) => http.patch(EP.liveAutoAdvance(id), { autoAdvance }),
 };

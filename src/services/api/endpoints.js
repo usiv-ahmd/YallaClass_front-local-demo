@@ -32,6 +32,7 @@ export const EP = {
   liveCloseReopened:  (id)          => `/sessions/${id}/live/close-reopened`,
   liveEnd:            (id)          => `/sessions/${id}/live/end`,
   liveAllowEdit:      (id)          => `/sessions/${id}/live/allow-edit`,
+  liveAutoAdvance:    (id)          => `/sessions/${id}/live/auto-advance`,
 
   // ── Realtime ─────────────────────────
   wsSession:          (id)          => `/ws/sessions/${id}`,

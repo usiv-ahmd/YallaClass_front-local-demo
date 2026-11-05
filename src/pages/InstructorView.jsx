@@ -262,8 +262,8 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
                 <button className="button button-primary red" type="button" onClick={live.requestEndLive}>
                   إنهاء الحصة والعودة
                 </button>
-                <div className="session-status">
-                  <span className={`chip session-status ${live.statusView.cls}`}>
+                <div className="session-meta-status">
+                  <span className={`chip session-meta-status ${live.statusView.cls}`}>
                     <i /> {live.statusView.label}
                   </span>
                 </div>
@@ -287,8 +287,22 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
                       {students.length} طالب
                     </span>
                   </div>
-                  <div className="live-progress-track">
-                    <div className="live-progress-fill" style={{ width: `${progress}%` }} />
+                  <div className="question-progress">
+                    {Array.from({ length: live.totalQuestions }, (_, i) => {
+                      const isRoundOver = live.liveState === "finished" || live.liveState === "reopened";
+                      const isDone    = isRoundOver || i < live.currentQuestionIndex;
+                      const isCurrent = !isRoundOver && i === live.currentQuestionIndex;
+                      return (
+                        <span
+                          key={i}
+                          className={
+                            "question-progress__step" +
+                            (isDone ? " is-done" : "") +
+                            (isCurrent ? " is-current" : "")
+                          }
+                        />
+                      );
+                    })}
                   </div>
                 </section>
               )}
@@ -297,6 +311,33 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
                   <section className="card sidebar-card">
                     <h3 className="live-controls-h3">التحكم</h3>
                     <div className="live-controls-buttons">
+                      {["question", "paused", "reveal"].includes(live.liveState) && (
+                        <label className="auto-advance-toggle">
+                          <input
+                            type="checkbox"
+                            checked={live.autoAdvance}
+                            onChange={(e) => live.setAutoAdvance(e.target.checked)}
+                          />
+                          <span>تقدّم تلقائي</span>
+                          <small>
+                            {live.autoAdvance
+                              ? "الأسئلة بتتقدم لوحدها"
+                              : "التحكم يدوي"}
+                          </small>
+                        </label>
+                      )}
+                      
+                      {live.liveState === "reveal" && live.autoAdvance && live.autoAdvanceRemaining !== null && (
+                        <div className="auto-advance-countdown">
+                          <Timer size={14} />
+                          <span>
+                            {live.isLastQuestion
+                              ? `إنهاء الجولة بعد ${live.autoAdvanceRemaining} ث`
+                              : `السؤال التالي بعد ${live.autoAdvanceRemaining} ث`}
+                          </span>
+                        </div>
+                      )}
+
                       {live.liveState === "lobby" && (
                         <button className="button button-primary turquoise" onClick={live.startCountdown}>
                           <Play size={16} /> ابدأ الحصة

@@ -159,4 +159,5 @@ export const liveOps = {
   closeReopened:   liveOp(api.live.closeReopened),
   end:             liveOp(api.live.end),
   setAllowEdit:    liveOp(api.live.setAllowEdit),
+  setAutoAdvance:  liveOp(api.live.setAutoAdvance),
 };

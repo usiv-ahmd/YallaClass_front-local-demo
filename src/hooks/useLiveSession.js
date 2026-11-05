@@ -12,6 +12,9 @@ const LIVE_STATES = {
   reopened:  { label: "مفتوح للمتأخرين",  cls: "status-reveal",   canGoTo: ["finished"] },
 };
 
+// ⏱️ ثواني عرض الإجابة قبل الانتقال للسؤال التالي
+const REVEAL_AUTO_MS = 0;
+
 export function useLiveSession(session, setSession) {
   const [isLive, setIsLive]                     = useState(session?.live?.isLive ?? false);
   const [liveState, setLiveState]               = useState(session?.live?.state ?? "lobby");
@@ -19,13 +22,13 @@ export function useLiveSession(session, setSession) {
   const [isEndConfirmOpen, setIsEndConfirmOpen] = useState(false);
   const [reopenOpen, setReopenOpen]             = useState(false);
   const [now, setNow]                           = useState(() => Date.now());
+  const [autoAdvanceRemaining, setAutoAdvanceRemaining] = useState(null);
 
   const sessionId = session?.id;
 
-  // ── Derived questions ──────────────────────────
+  // ── Derived ──
   const rawQuestions = session?.questions;
-  const questions = Array.isArray(rawQuestions)
-    ? rawQuestions
+  const questions = Array.isArray(rawQuestions) ? rawQuestions
     : rawQuestions ? Object.values(rawQuestions) : [];
   const totalQuestions          = questions.length;
   const currentQuestion         = questions[currentQuestionIndex] ?? null;
@@ -33,11 +36,13 @@ export function useLiveSession(session, setSession) {
   const isLastQuestion          = currentQuestionIndex >= totalQuestions - 1;
   const statusView              = LIVE_STATES[liveState] ?? LIVE_STATES.lobby;
   const allowAnswerEdit         = session?.reopenedFor?.allowEdit ?? false;
+  const students                = session?.students ?? [];
+  const studentAnswers          = session?.answers ?? {};
 
-  const students       = session?.students ?? [];
-  const studentAnswers = session?.answers ?? {};
+  // ✅ التقدّم التلقائي (default ON)
+  const autoAdvance = session?.live?.autoAdvance ?? true;
 
-  // ── Tick while a question is live ──
+  // tick
   useEffect(() => {
     if (liveState !== "question") return;
     setNow(Date.now());
@@ -45,7 +50,6 @@ export function useLiveSession(session, setSession) {
     return () => clearInterval(i);
   }, [liveState]);
 
-  // ── timeLeft: derived from startedAt (backend-authoritative) ──
   const timeLeft = useMemo(() => {
     const live = session?.live;
     if (!live) return 0;
@@ -55,7 +59,17 @@ export function useLiveSession(session, setSession) {
     return Math.max(0, currentQuestionDuration - elapsed);
   }, [session?.live, now, currentQuestionDuration]);
 
-  // ── Sync local state من الـ session ──
+  // reset state كامل لما الـ session.id يتغيّر
+  useEffect(() => {
+    if (!session?.id) return;
+    setIsLive(session.live?.isLive ?? false);
+    setLiveState(session.live?.state ?? "lobby");
+    setCurrentQIdx(session.live?.currentQuestionIndex ?? 0);
+    setIsEndConfirmOpen(false);
+    setReopenOpen(false);
+  }, [session?.id]);
+
+  // sync داخلي
   useEffect(() => {
     if (!session?.live) return;
     setIsLive(session.live.isLive ?? false);
@@ -63,14 +77,18 @@ export function useLiveSession(session, setSession) {
     setCurrentQIdx(session.live.currentQuestionIndex ?? 0);
   }, [session?.live?.isLive, session?.live?.state, session?.live?.currentQuestionIndex]);
 
-  // ── Modals ──
+  // ── Refs للحماية من race conditions ──
+  const stateRef = useRef(liveState);
+  const indexRef = useRef(currentQuestionIndex);
+  useEffect(() => { stateRef.current = liveState; }, [liveState]);
+  useEffect(() => { indexRef.current = currentQuestionIndex; }, [currentQuestionIndex]);
+
   const reopenModal = useMemo(() => ({
     isOpen: reopenOpen,
     open:   () => setReopenOpen(true),
     close:  () => setReopenOpen(false),
   }), [reopenOpen]);
 
-  // ── Student answered helpers ──
   const answeredCountFor = useCallback((studentId) => {
     const map = studentAnswers[studentId] ?? {};
     return questions.reduce((n, q) => n + (map[q.id] != null ? 1 : 0), 0);
@@ -96,7 +114,6 @@ export function useLiveSession(session, setSession) {
   const canFinish = liveState === "paused" || liveState === "reveal" ||
                    (liveState === "question" && isLastQuestion);
 
-  // ── Sync helper ──
   const apply = (updated) => {
     if (!updated) return false;
     setSession(updated);
@@ -108,13 +125,12 @@ export function useLiveSession(session, setSession) {
     return true;
   };
 
-  // ── Transitions (كلها async) ──────────────────
+  // ── Transitions ──
   const startLiveSession = async () => {
     if (!session)             { alert("اعمل الحصة الأول."); return false; }
     if (totalQuestions === 0) { alert("ضيف سؤال واحد على الأقل."); return false; }
     return apply(await liveOps.start(sessionId));
   };
-
   const startCountdown  = async () => apply(await liveOps.startCountdown(sessionId));
   const cancelCountdown = async () => apply(await liveOps.cancelCountdown(sessionId));
 
@@ -135,7 +151,6 @@ export function useLiveSession(session, setSession) {
 
   const finishSession = async () => apply(await liveOps.finishRound(sessionId));
 
-  // ── Reopen / close-reopened ──
   const confirmReopen = async (allowEdit = false) => {
     if (liveState !== "finished" || pendingStudents.length === 0) return false;
     const ok = apply(await liveOps.reopen(sessionId, allowEdit));
@@ -150,9 +165,17 @@ export function useLiveSession(session, setSession) {
 
   const setAllowAnswerEdit = async (value) => apply(await liveOps.setAllowEdit(sessionId, value));
 
-  // ── Auto-reveal لما الوقت يخلص (once per question) ──
+  // ── Toggle: Auto-advance ──
+  const setAutoAdvance = async (value) => {
+    const ok = apply(await liveOps.setAutoAdvance(sessionId, value));
+    if (!value) setAutoAdvanceRemaining(null);
+    return ok;
+  };
+
+  // ── 1) Auto-reveal لما الوقت يخلص ──
   const revealedRef = useRef(-1);
   useEffect(() => {
+    if (!autoAdvance) return;
     if (liveState !== "question") return;
     if (totalQuestions === 0) return;
     if (timeLeft > 0) return;
@@ -160,12 +183,75 @@ export function useLiveSession(session, setSession) {
     revealedRef.current = currentQuestionIndex;
     revealAnswer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [liveState, timeLeft, totalQuestions, currentQuestionIndex]);
+  }, [liveState, timeLeft, totalQuestions, currentQuestionIndex, autoAdvance]);
 
-  // reset guard عند تغيير السؤال
   useEffect(() => {
     revealedRef.current = -1;
-  }, [currentQuestionIndex]);
+  }, [currentQuestionIndex, session?.id]);
+
+  // ── 2) Auto-advance من reveal للسؤال اللي بعده ──
+  const autoAdvanceTimerRef = useRef(null);
+  const advancedRef = useRef(-1);
+
+  useEffect(() => {
+    // نظّف أي timer قديم
+    if (autoAdvanceTimerRef.current) {
+      clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+
+    if (!autoAdvance) {
+      setAutoAdvanceRemaining(null);
+      return;
+    }
+    if (liveState !== "reveal") {
+      setAutoAdvanceRemaining(null);
+      return;
+    }
+    if (advancedRef.current === currentQuestionIndex) {
+      setAutoAdvanceRemaining(null);
+      return;
+    }
+
+    const totalSeconds = Math.ceil(REVEAL_AUTO_MS / 1000);
+    setAutoAdvanceRemaining(totalSeconds);
+
+    const tickInterval = setInterval(() => {
+      setAutoAdvanceRemaining((v) => (v === null ? null : Math.max(0, v - 1)));
+    }, 1000);
+
+    autoAdvanceTimerRef.current = setTimeout(() => {
+      autoAdvanceTimerRef.current = null;
+      clearInterval(tickInterval);
+      setAutoAdvanceRemaining(null);
+
+      // Safety guards
+      if (stateRef.current !== "reveal") return;
+      if (indexRef.current !== currentQuestionIndex) return;
+      if (advancedRef.current === currentQuestionIndex) return;
+
+      advancedRef.current = currentQuestionIndex;
+
+      if (isLastQuestion) {
+        finishSession();
+      } else {
+        nextQuestion();
+      }
+    }, REVEAL_AUTO_MS);
+
+    return () => {
+      if (autoAdvanceTimerRef.current) {
+        clearTimeout(autoAdvanceTimerRef.current);
+        autoAdvanceTimerRef.current = null;
+      }
+      clearInterval(tickInterval);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveState, currentQuestionIndex, autoAdvance, isLastQuestion]);
+
+  useEffect(() => {
+    advancedRef.current = -1;
+  }, [currentQuestionIndex, session?.id]);
 
   // ── End live ──
   const requestEndLive = () => setIsEndConfirmOpen(true);
@@ -174,19 +260,18 @@ export function useLiveSession(session, setSession) {
     apply(await liveOps.end(sessionId));
     setIsEndConfirmOpen(false);
     setReopenOpen(false);
+    setAutoAdvanceRemaining(null);
   };
 
   const restartRound = () => {
     setCurrentQIdx(0);
     setLiveState("lobby");
+    setAutoAdvanceRemaining(null);
   };
 
   // ── goToState: dispatcher (backward compat) ──
   const goToState = async (target) => {
-    if (!canTransitionTo(target)) {
-      console.warn(`[useLiveSession] Invalid transition: ${liveState} → ${target}`);
-      return false;
-    }
+    if (!canTransitionTo(target)) return false;
     switch (target) {
       case "countdown": return startCountdown();
       case "lobby":     return liveState === "countdown" ? cancelCountdown() : false;
@@ -210,6 +295,12 @@ export function useLiveSession(session, setSession) {
     reopenModal, confirmReopen, closeReopenedRound,
 
     canTransitionTo, canPause, canResume, canReveal, canNext, canFinish,
+
+    // ✅ جديد
+    autoAdvance,
+    setAutoAdvance,
+    autoAdvanceRemaining,
+    revealAutoMs: REVEAL_AUTO_MS,
 
     startLiveSession, startCountdown, cancelCountdown,
     startQuestion, pauseQuestion, resumeQuestion,
