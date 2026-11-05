@@ -131,9 +131,7 @@ function QuestionPanel({
   return (
     <div className="student-question" data-heat={Math.min(4, heat)}>
       <div className="question-meta-row">
-        <div className="question-session">
-          <span className="mini-label">سؤال {formatNumber(index + 1)} من {formatNumber(total)}</span>
-        </div>
+        <span className="mini-label">سؤال {formatNumber(index + 1)} من {formatNumber(total)}</span>
         <div className="question-stats">
           <span className="stat-chip">
             <Clock3 size={16} /> {formatNumber(Math.ceil(timeLeft))} <small>ث</small>
