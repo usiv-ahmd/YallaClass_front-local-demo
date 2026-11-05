@@ -307,7 +307,7 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
                 </section>
               )}
               <div className="layout">
-                <aside className="instructor-sidebar">
+                <aside className="sidebar">
                   <section className="card sidebar-card">
                     <h3 className="live-controls-h3">التحكم</h3>
                     <div className="live-controls-buttons">

@@ -10,6 +10,7 @@
   --C-yalla-danger: #FF5A5F;
   --C-yalla-info: #2F80ED;
   --C-yalla-success: #27C281;
+  --C-yalla-alert: #c53030;
 
   --C-yalla-primary-hover: #0D998C;
   --C-yalla-primary-strong-hover: #08766C;
@@ -62,6 +63,24 @@
   --yalla-center-shadow-button-hover: 0 6px 0 var(--C-yalla-border-strong);
 
   --yalla-border: 3px solid var(--C-yalla-border-strong);
+
+
+
+  
+
+
+  --color-1: #9DB6BF;
+  --color-2: #8B6914;
+  --color-3: #ffd23f33;
+  --color-4: #FF9F1C;
+  --color-5: #1B9A64;
+  --color-6: #D63F44;
+  --color-7: #10b981;
+  --color-8: #ef4444;
+  --color-9: #ff5a5f99;
+  --color-10: #0fb5a6;
+  --color-11: #ffd23f8c;
+  --color-12: #27c28199;
 }
 
 * {
@@ -547,8 +566,8 @@ button {
   gap: 12px;
 }
 .modal-content p {
-  font-size: '15px';
-  line-height: '1.6';
+  font-size: 15px;
+  line-height: 1.6;
   color: var(--C-yalla-tint);
 }
 
@@ -592,6 +611,16 @@ button {
   align-items: flex-start;
   justify-content: center;
   width: 100%;
+}
+.sidebar {
+  position: sticky;
+  top: 24px;
+  flex: 0 0 450px;
+  width: 450px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2vw, 20px);
 }
 
 
@@ -641,7 +670,7 @@ label {
 }
 
 .error-alert {
-  color: #c53030 !important;
+  color: var(--C-yalla-alert) !important;
   font-size: 13px;
   display: flex;
   align-items: center;
@@ -652,7 +681,7 @@ label {
 
 .error-alert svg {
   flex-shrink: 0;
-  color: #c53030;
+  color: var(--C-yalla-alert);
   position: static !important;
   background-color: transparent !important;
 }

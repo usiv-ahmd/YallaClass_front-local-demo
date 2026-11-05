@@ -81,17 +81,15 @@ function NameChangeWarning({ currentName, onSave, onLeave }) {
             لازم تغيّره عشان تكمل في الحصة.
           </p>
 
-          <div className="name-warning-form">
-            <label htmlFor="session-code">اسمك الجديد</label>
-            <div className="input-wrap">
-              <input type="text" autoFocus required maxLength={24} value={newName} onChange={(e) => { setNewName(e.target.value); setError(""); }} placeholder="اكتب اسمك الجديد" />
-            </div>
-            {error && (
-              <p className="error-alert">
-                <AlertCircle size={14} /> {error}
-              </p>
-            )}
+          <label htmlFor="session-code">اسمك الجديد</label>
+          <div className="input-wrap">
+            <input type="text" autoFocus required maxLength={24} value={newName} onChange={(e) => { setNewName(e.target.value); setError(""); }} placeholder="اكتب اسمك الجديد" />
           </div>
+          {error && (
+            <p className="error-alert">
+              <AlertCircle size={14} /> {error}
+            </p>
+          )}
 
           <div className="modal-actions">
             <button className="button modal-button white" type="button" onClick={onLeave}>
@@ -1017,7 +1015,7 @@ function StudentView() {
             </button>
           </div>
 
-          <aside className="instructor-sidebar">
+          <aside className="sidebar">
             <div className="card stack-card">
               <div className="card-heading">
                 <div className="card-heading-title">

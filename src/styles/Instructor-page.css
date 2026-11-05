@@ -50,17 +50,6 @@
   Layout
   ========================================= */
 
-.instructor-sidebar {
-  position: sticky;
-  top: 24px;
-  flex: 0 0 450px;
-  width: 450px;
-  max-width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: clamp(14px, 2vw, 20px);
-}
-
 .session-workspace, .live-workspace {
   display: flex;
   flex-direction: column;
