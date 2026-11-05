@@ -13,9 +13,10 @@ export function getCorrectIndex(question) {
   return -1;
 }
 
+// ⚠️ لازم يفضل export — InstructorView و QuestionFormWindow بيعتمدوا عليه
 export const QUESTION_DURATIONS = [15, 30, 45, 60, 90, 120];
 
-export default function useQuestionsForm({ session, updateQuestions }) {
+export function useQuestionsForm({ session, updateQuestions }) {
   const [formOpen, setFormOpen]         = useState(false);
   const [text, setText]                 = useState("");
   const [options, setOptions]           = useState(["", "", "", ""]);
@@ -41,9 +42,11 @@ export default function useQuestionsForm({ session, updateQuestions }) {
       : Object.values(rawQuestions)
     : [];
 
-  // ── حفظ التعديلات على الجلسة ──────────────────────
-  const commit = (nextQuestions) => {
-    if (typeof updateQuestions === "function") updateQuestions(nextQuestions);
+  // ── حفظ التعديلات على الجلسة (بقى async دلوقتي) ──
+  const commit = async (nextQuestions) => {
+    if (typeof updateQuestions === "function") {
+      await updateQuestions(nextQuestions);
+    }
   };
 
   // ── فتح الفورم لإضافة سؤال جديد ────────────────────
@@ -67,8 +70,8 @@ export default function useQuestionsForm({ session, updateQuestions }) {
     setFormOpen(true);
   }
 
-  // ── Submit: إضافة أو تعديل حسب editingId ──────────────
-  function addQuestion(event) {
+  // ── Submit: إضافة أو تعديل حسب editingId (async) ─────
+  async function addQuestion(event) {
     event.preventDefault();
 
     const trimmedOptions = options.map((option) => option.trim());
@@ -88,40 +91,44 @@ export default function useQuestionsForm({ session, updateQuestions }) {
 
     const safeDuration = Math.min(120, Math.max(5, Number(duration) || 30));
 
-    if (editingId) {
-      // 🔄 وضع التعديل
-      commit(
-        questions.map((q) =>
-          q.id === editingId
-            ? {
-                ...q,
-                question: text.trim(),
-                text: text.trim(),
-                options: trimmedOptions,
-                correctOptionIndex: correctIndex,
-                correctAnswer: trimmedOptions[correctIndex],
-                duration: safeDuration,
-              }
-            : q
-        )
-      );
-    } else {
-      // ➕ وضع الإضافة
-      const newQuestion = {
-        id: makeId("question"),
-        question: text.trim(),
-        text: text.trim(),
-        options: trimmedOptions,
-        correctOptionIndex: correctIndex,
-        correctAnswer: trimmedOptions[correctIndex],
-        duration: safeDuration,
-        source: "manual",
-        type: "mcq",
-      };
-      commit([...questions, newQuestion]);
+    try {
+      if (editingId) {
+        // 🔄 وضع التعديل
+        await commit(
+          questions.map((q) =>
+            q.id === editingId
+              ? {
+                  ...q,
+                  question: text.trim(),
+                  text: text.trim(),
+                  options: trimmedOptions,
+                  correctOptionIndex: correctIndex,
+                  correctAnswer: trimmedOptions[correctIndex],
+                  duration: safeDuration,
+                }
+              : q
+          )
+        );
+      } else {
+        // ➕ وضع الإضافة
+        const newQuestion = {
+          id: makeId("question"),
+          question: text.trim(),
+          text: text.trim(),
+          options: trimmedOptions,
+          correctOptionIndex: correctIndex,
+          correctAnswer: trimmedOptions[correctIndex],
+          duration: safeDuration,
+          source: "manual",
+          type: "mcq",
+        };
+        await commit([...questions, newQuestion]);
+      }
+      resetForm();
+    } catch (e) {
+      console.error("[addQuestion]", e);
+      alert("حصل خطأ أثناء حفظ السؤال، حاول تاني");
     }
-
-    resetForm();
   }
 
   // ── Options ────────────────────────────────────────
@@ -138,10 +145,15 @@ export default function useQuestionsForm({ session, updateQuestions }) {
     );
   }
 
-  // ── Delete ─────────────────────────────────────────
-  function deleteQuestion(questionId) {
-    commit(questions.filter((item) => item.id !== questionId));
-    if (editingId === questionId) resetForm();
+  // ── Delete (async) ─────────────────────────────────
+  async function deleteQuestion(questionId) {
+    try {
+      await commit(questions.filter((item) => item.id !== questionId));
+      if (editingId === questionId) resetForm();
+    } catch (e) {
+      console.error("[deleteQuestion]", e);
+      alert("حصل خطأ أثناء حذف السؤال، حاول تاني");
+    }
   }
 
   return {

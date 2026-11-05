@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-export default function useCountdown({ active, seconds = 3, onEnd }) {
+export function useCountdown({ active, seconds = 3, onEnd }) {
   const [remaining, setRemaining] = useState(seconds);
   const onEndRef = useRef(onEnd);
 

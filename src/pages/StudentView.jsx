@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+// src/pages/StudentView.jsx
+import { useState, useEffect, useRef } from "react";
 import {
   KeyRound, ArrowLeft, AlertCircle, Check, Clock3, Zap, Flame,
   X, Sparkles, Trophy, Users, ListChecks, Timer,
@@ -8,10 +9,10 @@ import {
   findSessionByCode,
   addStudentToSession,
   subscribeSessions,
-  readSessions,
-  upsertSession,
+  updateStudent,
+  submitAnswer,        // ← من الـ store دلوقتي (async)
 } from "../store/sessionStore";
-import useCountdown from "../hooks/useCountdown";
+import { useCountdown } from "../hooks/useCountdown.js";
 import { Reaction } from "../Components/Reactions.jsx";
 import { pickReaction, pickStateReaction } from "../utils/pickReaction";
 import "../styles/student-page.css";
@@ -36,73 +37,73 @@ function getCorrectIndex(question) {
   return -1;
 }
 
-function computeStats(student, answersMap, questions) {
-  let score = 0, correct = 0, wrong = 0, streak = 0, highest = 0, answered = 0;
-  for (const q of questions) {
-    const ans = answersMap[q.id];
-    if (!ans) continue;
-    answered++;
-    if (ans.isCorrect) {
-      score += ans.points || 0;
-      correct++;
-      streak++;
-      if (streak > highest) highest = streak;
-    } else {
-      wrong++;
-      streak = 0;
+// ─────────────────────────────────────────────
+//  Name Change Warning Modal (زي ما هي)
+// ─────────────────────────────────────────────
+function NameChangeWarning({ currentName, onSave, onLeave }) {
+  const [newName, setNewName] = useState("");
+  const [error, setError]     = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const trimmed = newName.trim();
+    if (trimmed.length < 2) {
+      return setError("اكتب اسم جديد (حرفين على الأقل)");
     }
-  }
-  return {
-    ...student,
-    score,
-    correctAnswers: correct,
-    wrongAnswers: wrong,
-    highestStreak: highest,
-    currentStreak: streak,
-    interacted: answered > 0,
-    finishedAt:
-      questions.length > 0 && answered >= questions.length
-        ? student.finishedAt || Date.now()
-        : student.finishedAt || null,
-  };
-}
-
-function submitAnswer({ sessionId, studentId, question, optionIndex, timeLeft }) {
-  const all = readSessions();
-  const session = all[sessionId];
-  if (!session) return;
-
-  const questions = getQuestions(session);
-  const correctIndex = getCorrectIndex(question);
-  const isCorrect = optionIndex === correctIndex;
-  const speedBonus = isCorrect ? Math.max(0, Math.round(timeLeft * 5)) : 0;
-  const points = isCorrect ? 100 + speedBonus : 0;
-
-  const answer = {
-    questionId: question.id,
-    selectedOption: optionIndex,
-    isCorrect,
-    points,
-    speedBonus,
-    kind: isCorrect ? "correct" : "wrong",
-    answeredAt: Date.now(),
+    if (trimmed.toLowerCase() === currentName.trim().toLowerCase()) {
+      return setError("الاسم الجديد لازم يكون مختلف عن القديم");
+    }
+    onSave(trimmed);
   };
 
-  const prevAnswers = session.answers?.[studentId] || {};
-  const nextAnswers = { ...prevAnswers, [question.id]: answer };
-  const nextStudents = (session.students || []).map((s) =>
-    s.id === studentId ? computeStats(s, nextAnswers, questions) : s
+  return (
+    <div
+      className="name-warning-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="name-warning-title"
+    >
+      <div className="card name-warning-card">
+        <div className="name-warning-icon">
+          <AlertCircle size={44} />
+        </div>
+        <h2 id="name-warning-title">اسمك مخالف</h2>
+        <p className="name-warning-copy">
+          المدرس بعتلك تحذير إن اسمك الحالي <b>«{currentName}»</b> مخالف.
+          لازم تغيّره عشان تكمل في الجلسة.
+        </p>
+        <form onSubmit={handleSubmit} className="name-warning-form" noValidate>
+          <input
+            type="text"
+            placeholder="اكتب اسمك الجديد"
+            value={newName}
+            onChange={(e) => { setNewName(e.target.value); setError(""); }}
+            maxLength={24}
+            autoFocus
+          />
+          {error && (
+            <p className="name-warning-error">
+              <AlertCircle size={14} /> {error}
+            </p>
+          )}
+          <button className="button button-primary turquoise" type="submit">
+            احفظ الاسم الجديد
+          </button>
+        </form>
+        <button
+          type="button"
+          className="button ghost name-warning-leave"
+          onClick={onLeave}
+        >
+          خروج من الجلسة
+        </button>
+      </div>
+    </div>
   );
-
-  upsertSession({
-    ...session,
-    answers: { ...(session.answers || {}), [studentId]: nextAnswers },
-    students: nextStudents,
-  });
 }
 
 // ─────────────────────────────────────────────
-//  Question Panel
+//  Question Panel (زي ما هي)
 // ─────────────────────────────────────────────
 function QuestionPanel({
   question,
@@ -239,11 +240,94 @@ function QuestionPanel({
 }
 
 // ─────────────────────────────────────────────
-//  Reopened view
+//  Reopened view — سؤال واحد في المرة + timer شغال
 // ─────────────────────────────────────────────
-function ReopenedView({ session, student, questions, studentAnswers }) {
+function ReopenedView({ session, student, questions, studentAnswers, liveState }) {
   const allowed = session.reopenedFor?.studentIds?.includes(student.id) || false;
   const unanswered = questions.filter((q) => !studentAnswers[q.id]);
+
+  const [currentQuestionId, setCurrentQuestionId] = useState(null);
+  const [started, setStarted]     = useState(false);
+  const [startedAt, setStartedAt] = useState(null);
+  const [now, setNow]             = useState(() => Date.now());
+  const [submitting, setSubmitting] = useState(false);
+  const timedOutRef = useRef(null);
+
+  // السؤال الحالي: نستخدم id مش index عشان unanswered بتتقلّب بعد كل إجابة
+  const currentQuestion = (() => {
+    if (currentQuestionId) {
+      const q = unanswered.find((x) => x.id === currentQuestionId);
+      if (q) return q;
+    }
+    return unanswered[0] || null;
+  })();
+  const duration = Number(currentQuestion?.duration) || 30;
+
+  // ضبط أول سؤال لما يدخل
+  useEffect(() => {
+    if (!currentQuestionId && unanswered.length > 0) {
+      setCurrentQuestionId(unanswered[0].id);
+    }
+  }, [unanswered, currentQuestionId]);
+
+  // tick — يشتغل بس لما الطالب يبدأ السؤال
+  useEffect(() => {
+    if (!started || !currentQuestion) return;
+    const i = setInterval(() => setNow(Date.now()), 500);
+    return () => clearInterval(i);
+  }, [started, currentQuestion?.id]);
+
+  const timeLeft = (() => {
+    if (!started || !startedAt) return duration;
+    const elapsed = Math.floor((now - startedAt) / 1000);
+    return Math.max(0, duration - elapsed);
+  })();
+
+  const startQuestion = () => {
+    setStarted(true);
+    setStartedAt(Date.now());
+    setNow(Date.now());
+    timedOutRef.current = null;
+  };
+
+  const handleSubmitAnswer = async (optionIndex) => {
+    if (!currentQuestion || submitting) return;
+    setSubmitting(true);
+    const submittedId = currentQuestion.id;
+    try {
+      if (optionIndex !== null) {
+        await submitAnswer({
+          sessionId: session.id,
+          studentId: student.id,
+          questionId: submittedId,
+          selectedOption: optionIndex,
+          timeLeft: Math.max(0, timeLeft),
+        });
+      }
+      // الانتقال للسؤال اللي بعده
+      const remaining = unanswered.filter((q) => q.id !== submittedId);
+      setCurrentQuestionId(remaining[0]?.id || null);
+      setStarted(false);
+      setStartedAt(null);
+    } catch (err) {
+      console.error("[ReopenedView.submit]", err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // لما الوقت يخلص → نبعت timeout ونروح للسؤال اللي بعده (مرة واحدة بس لكل سؤال)
+  useEffect(() => {
+    if (!started || !currentQuestion) return;
+    if (timeLeft > 0) return;
+    if (timedOutRef.current === currentQuestion.id) return;
+    timedOutRef.current = currentQuestion.id;
+    handleSubmitAnswer(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeft, started, currentQuestion?.id]);
+
+  // 🛡️ حماية: لو الحالة اتغيرت (المدرس قفل الجولة)، نختفي فوراً
+  if (liveState && liveState !== "reopened") return null;
 
   if (!allowed) {
     return (
@@ -255,7 +339,8 @@ function ReopenedView({ session, student, questions, studentAnswers }) {
     );
   }
 
-  if (unanswered.length === 0) {
+  // خلص كل الأسئلة
+  if (!currentQuestion) {
     return (
       <div className="live-finished">
         <Trophy size={44} />
@@ -265,38 +350,56 @@ function ReopenedView({ session, student, questions, studentAnswers }) {
     );
   }
 
+  // شاشة البداية — قبل ما الطالب يبدأ السؤال
+  if (!started) {
+    const remainingCount = unanswered.length;
+    const doneCount = questions.length - remainingCount;
+    return (
+      <div className="live-lobby">
+        <div className="live-lobby-icon"><Timer size={36} /></div>
+        <h2>مفتوح للمتأخرين</h2>
+        <p>
+          باقي {formatNumber(remainingCount)} سؤال.
+          {doneCount > 0 && ` (جاوبت ${formatNumber(doneCount)} من ${formatNumber(questions.length)})`}
+        </p>
+        <p className="muted" style={{ marginTop: 6 }}>
+          الوقت هيبدأ لما تضغط الزرار. السؤال الحالي مدته {formatNumber(duration)} ثانية.
+        </p>
+        <button
+          type="button"
+          className="button button-primary turquoise"
+          onClick={startQuestion}
+          style={{ marginTop: 12 }}
+        >
+          ابدأ السؤال
+        </button>
+      </div>
+    );
+  }
+
+  // السؤال شغال
+  const questionNumber = questions.indexOf(currentQuestion) + 1;
   return (
     <div>
       <div className="session-status status-reveal" style={{ marginBottom: 14 }}>
-        <i /> مفتوح للمتأخرين — باقي {formatNumber(unanswered.length)} سؤال
+        <i /> مفتوح للمتأخرين — سؤال {formatNumber(questionNumber)} من {formatNumber(questions.length)}
+        {" — "}باقي {formatNumber(unanswered.length)}
       </div>
-      {unanswered.map((q) => (
-        <div key={q.id} style={{ marginBottom: 16 }}>
-          <QuestionPanel
-            question={q}
-            index={questions.indexOf(q)}
-            total={questions.length}
-            answer={null}
-            timeLeft={Number(q.duration) || 30}
-            duration={Number(q.duration) || 30}
-            onChoose={(optIdx) =>
-              submitAnswer({
-                sessionId: session.id,
-                studentId: student.id,
-                question: q,
-                optionIndex: optIdx,
-                timeLeft: 0,
-              })
-            }
-          />
-        </div>
-      ))}
+      <QuestionPanel
+        question={currentQuestion}
+        index={questionNumber - 1}
+        total={questions.length}
+        answer={null}
+        timeLeft={timeLeft}
+        duration={duration}
+        onChoose={handleSubmitAnswer}
+      />
     </div>
   );
 }
 
 // ─────────────────────────────────────────────
-//  Leaderboard pieces
+//  Leaderboard pieces (زي ما هي)
 // ─────────────────────────────────────────────
 function StudentAvatar({ player, size = 40 }) {
   const initial = (player?.name || "؟").trim().charAt(0) || "؟";
@@ -343,6 +446,7 @@ function StudentView() {
   const [error, setError]       = useState("");
   const [joined, setJoined]     = useState(null);
   const [reaction, setReaction] = useState(null);
+  const [now, setNow]           = useState(() => Date.now());   // ← timer tick
 
   const isCountdown = joined?.session?.live?.state === "countdown";
   const { remaining: countdownRemaining } = useCountdown({
@@ -350,16 +454,42 @@ function StudentView() {
     seconds: 3,
   });
 
+  // ── Timer tick: يشتغل بس وقت السؤال ──
+  useEffect(() => {
+    if (joined?.session?.live?.state !== "question") return;
+    setNow(Date.now());
+    const i = setInterval(() => setNow(Date.now()), 500);
+    return () => clearInterval(i);
+  }, [joined?.session?.live?.state]);
+
   const triggerReaction = (key) => {
     if (!key) return;
     setReaction({ key, id: Date.now() });
   };
 
+  // ── Subscription: تحديث الجلسة + طرد الطالب لو اتحذف ──
   useEffect(() => {
     if (!joined?.session?.id) return;
+
+    const sessionId = joined.session.id;
+    const studentId = joined.student.id;
+
     return subscribeSessions((all) => {
-      const fresh = all[joined.session.id];
-      if (!fresh) return;
+      const fresh = all[sessionId];
+
+      if (!fresh) {
+        setError("تم إنهاء الجلسة من قِبل المدرس");
+        setJoined(null);
+        return;
+      }
+
+      const stillInSession = (fresh.students || []).some((s) => s.id === studentId);
+      if (!stillInSession) {
+        setError("تم إخراجك من الجلسة من قِبل المدرس");
+        setJoined(null);
+        return;
+      }
+
       setJoined((prev) =>
         !prev || JSON.stringify(prev.session) === JSON.stringify(fresh)
           ? prev
@@ -368,7 +498,7 @@ function StudentView() {
     });
   }, [joined?.session?.id]);
 
-  // ── State-change reactions (lobby / paused / finished / reopened) ──
+  // ── State-change reactions ──
   const liveStateForReaction = joined?.session?.live?.isLive
     ? joined.session.live.state
     : "not-started";
@@ -379,7 +509,8 @@ function StudentView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [liveStateForReaction, joined?.session?.id]);
 
-  const handleJoin = (e) => {
+  // ── Join (async) ───────────────────────────────
+  const handleJoin = async (e) => {
     e.preventDefault();
     setError("");
     const trimmedName = name.trim();
@@ -387,30 +518,35 @@ function StudentView() {
     if (trimmedName.length < 2) return setError("اكتب اسمك (حرفين على الأقل)");
     if (!trimmedCode)            return setError("اكتب كود الجلسة");
 
-    const session = findSessionByCode(trimmedCode);
-    if (!session) return setError("الكود غلط أو الجلسة مش موجودة");
+    try {
+      const session = await findSessionByCode(trimmedCode);
+      if (!session) return setError("الكود غلط أو الجلسة مش موجودة");
 
-    const existing = (session.students || []).find(
-      (s) => s.name.trim().toLowerCase() === trimmedName.toLowerCase()
-    );
-    if (existing) return setJoined({ session, student: existing });
+      const existing = (session.students || []).find(
+        (s) => s.name.trim().toLowerCase() === trimmedName.toLowerCase()
+      );
+      if (existing) return setJoined({ session, student: existing });
 
-    const student = {
-      id: `student-${Date.now()}-${Math.random().toString(16).slice(2, 6)}`,
-      name: trimmedName,
-      attended: true,
-      interacted: false,
-      correctAnswers: 0,
-      wrongAnswers: 0,
-      score: 0,
-      highestStreak: 0,
-      currentStreak: 0,
-      finishedAt: null,
-      joinedAt: Date.now(),
-    };
-    const updated = addStudentToSession(session.id, student);
-    if (!updated) return setError("مقدرناش ننضمّك، حاول تاني");
-    setJoined({ session: updated, student });
+      const student = {
+        id: `student-${Date.now()}-${Math.random().toString(16).slice(2, 6)}`,
+        name: trimmedName,
+        attended: true,
+        interacted: false,
+        correctAnswers: 0,
+        wrongAnswers: 0,
+        score: 0,
+        highestStreak: 0,
+        currentStreak: 0,
+        finishedAt: null,
+        joinedAt: Date.now(),
+      };
+      const updated = await addStudentToSession(session.id, student);
+      if (!updated) return setError("مقدرناش ننضمّك، حاول تاني");
+      setJoined({ session: updated, student });
+    } catch (err) {
+      console.error(err);
+      setError("حصل خطأ في الاتصال، حاول تاني");
+    }
   };
 
   const handleLeave = () => {
@@ -421,7 +557,27 @@ function StudentView() {
     setReaction(null);
   };
 
-  const handleChoose = (optionIndex) => {
+  // ── Handle name change (async) ─────────────────
+  const handleChangeName = async (newName) => {
+    if (!joined) return;
+    try {
+      const updated = await updateStudent(joined.session.id, joined.student.id, {
+        name: newName,
+        warnedForNameChangeAt: null,
+      });
+      if (!updated) return;
+      const newStudent =
+        updated.students.find((s) => s.id === joined.student.id) || joined.student;
+      setJoined((prev) =>
+        prev ? { ...prev, session: updated, student: newStudent } : prev
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // ── Choose answer (async) ──────────────────────
+  const handleChoose = async (optionIndex) => {
     if (!joined) return;
     const { session, student } = joined;
     const live = session.live || {};
@@ -441,10 +597,19 @@ function StudentView() {
       return;
     }
 
-    // ── Trigger reaction قبل ما نبعت الإجابة ──
+    // احسب الوقت المتبقي محلياً من startedAt (للـ speed bonus/reaction)
+    const dur = Number(currentQuestion.duration) || 30;
+    const localTimeLeft = (() => {
+      if (live.state === "question" && live.startedAt) {
+        const elapsed = Math.floor((Date.now() - live.startedAt) / 1000);
+        return Math.max(0, dur - elapsed);
+      }
+      return live.timeLeft ?? 0;
+    })();
+
     const correctIndex = getCorrectIndex(currentQuestion);
     const isCorrect    = optionIndex === correctIndex;
-    const speedBonus   = isCorrect ? Math.max(0, Math.round((live.timeLeft ?? 0) * 5)) : 0;
+    const speedBonus   = isCorrect ? Math.max(0, Math.round(localTimeLeft * 5)) : 0;
     const currentStreakOfStudent =
       (session.students?.find((s) => s.id === student.id)?.currentStreak) || 0;
     const nextStreak = isCorrect ? currentStreakOfStudent + 1 : 0;
@@ -454,21 +619,25 @@ function StudentView() {
         isCorrect,
         streak:     nextStreak,
         speedBonus,
-        timeLeft:   live.timeLeft ?? 0,
-        duration:   Number(currentQuestion.duration) || 30,
+        timeLeft:   localTimeLeft,
+        duration:   dur,
       })
     );
 
-    submitAnswer({
-      sessionId: session.id,
-      studentId: student.id,
-      question: currentQuestion,
-      optionIndex,
-      timeLeft: live.timeLeft ?? 0,
-    });
+    try {
+      await submitAnswer({
+        sessionId: session.id,
+        studentId: student.id,
+        questionId: currentQuestion.id,
+        selectedOption: optionIndex,
+        timeLeft: localTimeLeft,
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  // ── Join form ─────────────────────────────
+  // ── Join form ─────────────────────────────────
   if (!joined) {
     return (
       <div className="page">
@@ -532,17 +701,24 @@ function StudentView() {
     );
   }
 
-  // ── Joined: live view ─────────────────────
+  // ── Joined: live view ─────────────────────────
   const { session } = joined;
   const live = session.live || {};
   const liveState = live.isLive ? live.state : "not-started";
   const questions = getQuestions(session);
 
-  // Question data
   const questionIndex = live.currentQuestionIndex ?? 0;
   const currentQuestion = questions[questionIndex] || null;
   const duration = Number(currentQuestion?.duration) || 30;
-  const timeLeft = live.timeLeft ?? 0;
+
+  // timeLeft: derived from startedAt (backend-authoritative)
+  const timeLeft = (() => {
+    if (live.state === "question" && live.startedAt) {
+      const elapsed = Math.floor((now - live.startedAt) / 1000);
+      return Math.max(0, duration - elapsed);
+    }
+    return live.timeLeft ?? 0;
+  })();
 
   const studentAnswers = session.answers?.[joined.student.id] || {};
   const currentAnswer = currentQuestion ? studentAnswers[currentQuestion.id] : null;
@@ -550,13 +726,14 @@ function StudentView() {
   const freshStudent =
     session.students?.find((s) => s.id === joined.student.id) || joined.student;
 
+  const isWarned = Boolean(freshStudent.warnedForNameChangeAt);
+
   const totalStudents = session.students?.length || 0;
   const answeredCount = questions.reduce(
     (n, q) => n + (studentAnswers[q.id] ? 1 : 0),
     0
   );
 
-  // Leaderboard data
   const sortedStudents = [...(session.students || [])].sort(
     (a, b) => (b.score || 0) - (a.score || 0)
   );
@@ -572,17 +749,24 @@ function StudentView() {
   const rankGain = 0;
   const rankGainLabel =
     rankGain > 0
-      ? `طلعت ${formatNumber(rankGain)} ${rankGain === 1 ? "مركز" : "مراكز"}`
+      ? `طلعت ${formatNumber(rankGain)} ${rankGain === 1 ? "مركز" : "مراكز"} لفوق!`
       : rankGain < 0
-      ? `نزلت ${formatNumber(-rankGain)} ${rankGain === -1 ? "مركز" : "مراكز"}`
-      : "في نفس المركز";
+      ? "لسه قدامك فرصة ترجع"
+      : "كل نقطة هتقربك للصدارة";
 
   return (
     <div className="page">
+      {isWarned && (
+        <NameChangeWarning
+          currentName={freshStudent.name}
+          onSave={handleChangeName}
+          onLeave={handleLeave}
+        />
+      )}
+
       <main className="dashboard">
         <div className="layout">
           <div className="card stack-card screen">
-            {/* ── Reaction (overlay) ── */}
             <Reaction
               reactionKey={reaction?.key}
               triggerId={reaction?.id}
@@ -608,7 +792,7 @@ function StudentView() {
             </div>
 
             <div className="student-live-stats">
-              <span><Trophy size={14} /> {formatNumber(freshStudent.correctAnswers)} صح</span>
+              <span><Check size={14} /> {formatNumber(freshStudent.correctAnswers)} صح</span>
               <span><X size={14} /> {formatNumber(freshStudent.wrongAnswers)} غلط</span>
               <span><ListChecks size={14} /> {formatNumber(answeredCount)}/{formatNumber(questions.length)} سؤال</span>
               <span><Users size={14} /> {formatNumber(totalStudents)} طالب</span>
@@ -728,31 +912,16 @@ function StudentView() {
             <div className="card stack-card">
               <div className="card-heading">
                 <div className="card-heading-title">
-                  <span className="card-icon turquoise"><Check size={26} /></span>
+                  <span className="card-icon color1"><Trophy size={26} /></span>
                   <div>
-                    <span className="card-eyebrow">أهلاً يا {freshStudent.name}</span>
-                    <h2>{session.title ?? "جلسة"}</h2>
+                    <span className="card-eyebrow">أهلاً الترتيب المباشر</span>
+                    <h2>المتصدرين</h2>
                   </div>
                 </div>
-                <div className="question-stats">
-                  <span className="stat-chip">
-                    <Zap size={16} /> {formatNumber(freshStudent.score)} <small>نقطة</small>
-                  </span>
-                  <span className="stat-chip stat-chip--streak">
-                    <Flame size={16} /> {formatNumber(freshStudent.highestStreak)} <small>streak</small>
-                  </span>
-                </div>
+                <span className="live-chip"><span /> LIVE</span>
               </div>
 
               <div>
-                <div className="leaderboard-header">
-                  <div>
-                    <span className="mini-label">الترتيب المباشر</span>
-                    <h2><Trophy size={22} fill="currentColor" />المتصدرين</h2>
-                  </div>
-                  <span className="live-chip"><span /> LIVE</span>
-                </div>
-
                 <div className="your-rank-card">
                   <StudentAvatar player={currentStudent} size={44} />
                   <div className="your-rank-card__copy">

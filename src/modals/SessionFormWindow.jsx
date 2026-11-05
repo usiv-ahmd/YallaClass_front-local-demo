@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { CalendarDays, Clock3, X } from 'lucide-react';
 
-export default function CreateSessionWindow({ onClose, onSubmit, initialData }) {
+export default function SessionFormWindow({ onClose, onSubmit, initialData }) {
   const isEditing = !!initialData;
 
   const [title, setTitle] = useState(initialData?.title || '');
@@ -9,8 +9,6 @@ export default function CreateSessionWindow({ onClose, onSubmit, initialData }) 
   const [date, setDate] = useState(initialData?.date || '');
   const [time, setTime] = useState(initialData?.time || '');
   const [duration, setDuration] = useState(initialData?.duration?.toString() || '30');
-
-  const cannotBeDraft = initialData?.status === "scheduled";
 
   const handleSubmit = (event) => {
     event.preventDefault();
