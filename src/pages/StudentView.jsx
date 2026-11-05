@@ -23,7 +23,6 @@ import "../styles/reactions.css";
 const ANSWER_LABELS = ["أ", "ب", "ج", "د", "هـ", "و"];
 const ANSWER_COLORS = ["turquoise", "yellow", "blue", "red"];
 
-// كل 20 ثانية نبعت "أنا موجود" — المدرس بيعتبر الطالب online لو آخر seen أقل من 45 ثانية
 const HEARTBEAT_INTERVAL_MS = 20_000;
 
 const formatNumber = (n) => Number(n || 0).toLocaleString("en-US");
@@ -62,7 +61,7 @@ function NameChangeWarning({ currentName, onSave, onLeave }) {
   };
 
   return (
-    <div className="opened-window-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+    <div className="opened-window-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) onLeave(); }}>
       <section className="card modal-window" role="dialog" aria-modal="true" aria-labelledby="name-warning-title">
         <div className="card-heading">
           <div className="card-heading-title">
@@ -82,7 +81,7 @@ function NameChangeWarning({ currentName, onSave, onLeave }) {
             لازم تغيّره عشان تكمل في الحصة.
           </p>
 
-          <form onSubmit={handleSubmit} className="name-warning-form" noValidate>
+          <div className="name-warning-form">
             <label htmlFor="session-code">اسمك الجديد</label>
             <div className="input-wrap">
               <input type="text" autoFocus required maxLength={24} value={newName} onChange={(e) => { setNewName(e.target.value); setError(""); }} placeholder="اكتب اسمك الجديد" />
@@ -92,8 +91,7 @@ function NameChangeWarning({ currentName, onSave, onLeave }) {
                 <AlertCircle size={14} /> {error}
               </p>
             )}
-          </form>
-
+          </div>
 
           <div className="modal-actions">
             <button className="button modal-button white" type="button" onClick={onLeave}>
@@ -112,142 +110,7 @@ function NameChangeWarning({ currentName, onSave, onLeave }) {
 }
 
 // ─────────────────────────────────────────────
-//  Question Panel
-// ─────────────────────────────────────────────
-function QuestionPanel({
-  question,
-  index,
-  total,
-  answer,
-  timeLeft,
-  duration,
-  onChoose,
-  readOnly = false,
-  heat = 0,
-}) {
-  const progress = duration > 0 ? Math.max(0, Math.min(1, timeLeft / duration)) : 0;
-  const timerMood = progress <= 0.25 ? "is-danger" : progress <= 0.5 ? "is-warning" : "";
-
-  return (
-    <div className="student-question" data-heat={Math.min(4, heat)}>
-      <div className="question-meta-row">
-        <span className="mini-label">سؤال {formatNumber(index + 1)} من {formatNumber(total)}</span>
-        <div className="question-stats">
-          <span className="stat-chip">
-            <Clock3 size={16} /> {formatNumber(Math.ceil(timeLeft))} <small>ث</small>
-          </span>
-        </div>
-      </div>
-
-      <div className="question-progress">
-        {Array.from({ length: total }, (_, i) => (
-          <span
-            key={i}
-            className={
-              "question-progress__step" +
-              (i < index ? " is-done" : "") +
-              (i === index ? " is-current" : "")
-            }
-          />
-        ))}
-      </div>
-
-      <div className="question-main-row">
-        <div className="question-copy">
-          <h2>{question.text ?? question.question}</h2>
-        </div>
-        <div
-          className={`timer-ring ${timerMood}`}
-          style={{ "--timer-angle": `${progress * 360}deg` }}
-          role="timer"
-        >
-          <div className="timer-ring__inner">
-            <Clock3 size={15} />
-            <strong>{formatNumber(Math.ceil(timeLeft))}</strong>
-            <small>ث</small>
-          </div>
-        </div>
-      </div>
-
-      <div className="answer-prompt">
-        <Sparkles size={18} /> <span>اختار إجابتك</span>
-      </div>
-
-      <div className="answer-grid">
-        {(question.options || []).map((option, optIndex) => {
-          const isCorrectOption = optIndex === getCorrectIndex(question);
-          const isSelected = answer?.selectedOption === optIndex;
-          let stateClass = "";
-
-          if (answer) {
-            if (isCorrectOption) stateClass = " answer-option--correct";
-            if (isSelected && !answer.isCorrect) stateClass = " answer-option--wrong";
-            if (!isCorrectOption && !isSelected) stateClass = " answer-option--muted";
-          } else if (readOnly) {
-            if (isCorrectOption) stateClass = " answer-option--correct";
-            else stateClass = " answer-option--muted";
-          }
-
-          return (
-            <button
-              key={optIndex}
-              type="button"
-              disabled={Boolean(answer) || readOnly}
-              className={`answer-option answer-option--${
-                ANSWER_COLORS[optIndex % ANSWER_COLORS.length]
-              }${stateClass}`}
-              onClick={() => onChoose(optIndex)}
-            >
-              <span className="answer-option__key">
-                {answer && isCorrectOption ? <Check size={19} strokeWidth={3} /> : null}
-                {answer && isSelected && !answer.isCorrect ? <X size={19} strokeWidth={3} /> : null}
-                {!answer || (!isCorrectOption && !isSelected) ? ANSWER_LABELS[optIndex] : null}
-              </span>
-              <span className="answer-option__text">{option}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {answer && (
-        <div
-          className={`answer-result ${
-            answer.isCorrect ? "answer-result--good" : "answer-result--retry"
-          }`}
-          role="status"
-        >
-          <span className="answer-result__icon">
-            {answer.isCorrect ? <Check size={20} /> : <Sparkles size={19} />}
-          </span>
-          <span>
-            <strong>
-              {answer.isCorrect
-                ? `إجابة صحيحة! +${formatNumber(answer.points)} نقطة`
-                : "إجابة غلط"}
-            </strong>
-            {answer.isCorrect && answer.speedBonus > 0 && (
-              <small>+{formatNumber(answer.speedBonus)} مكافأة سرعة</small>
-            )}
-            {!answer.isCorrect && (
-              <small>
-                الإجابة الصحيحة: {question.options?.[getCorrectIndex(question)]}
-              </small>
-            )}
-          </span>
-        </div>
-      )}
-
-      {readOnly && !answer && (
-        <p className="muted" style={{ textAlign: "center", marginTop: 12 }}>
-          الوقت خلص. الإجابة الصحيحة: {question.options?.[getCorrectIndex(question)]}
-        </p>
-      )}
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────
-//  Reopened view — سؤال واحد في المرة + timer شغال
+//  Reopened view
 // ─────────────────────────────────────────────
 function ReopenedView({ session, student, questions, studentAnswers, liveState }) {
   const allowed = session.reopenedFor?.studentIds?.includes(student.id) || false;
@@ -377,21 +240,138 @@ function ReopenedView({ session, student, questions, studentAnswers, liveState }
   }
 
   const questionNumber = questions.indexOf(currentQuestion) + 1;
+
+  const index = questionNumber - 1;
+  const total = questions.length;
+  const progress = duration > 0 ? Math.max(0, Math.min(1, timeLeft / duration)) : 0;
+  const timerMood = progress <= 0.25 ? "is-danger" : progress <= 0.5 ? "is-warning" : "";
+  const heat = 0;
+  const answer = null;
+  const readOnly = false;
+
   return (
     <div>
       <div className="session-status status-reveal" style={{ marginBottom: 14 }}>
         <i /> مفتوح للمتأخرين — سؤال {formatNumber(questionNumber)} من {formatNumber(questions.length)}
         {" — "}باقي {formatNumber(unanswered.length)}
       </div>
-      <QuestionPanel
-        question={currentQuestion}
-        index={questionNumber - 1}
-        total={questions.length}
-        answer={null}
-        timeLeft={timeLeft}
-        duration={duration}
-        onChoose={handleSubmitAnswer}
-      />
+      
+      <div className="student-question" data-heat={Math.min(4, heat)}>
+        <div className="question-meta-row">
+          <div className="question-session">
+            <span className="mini-label">سؤال {formatNumber(index + 1)} من {formatNumber(total)}</span>
+          </div>
+          <div className="question-stats">
+            <span className="stat-chip">
+              <Clock3 size={16} /> {formatNumber(Math.ceil(timeLeft))} <small>ث</small>
+            </span>
+          </div>
+        </div>
+
+        <div className="question-progress">
+          {Array.from({ length: total }, (_, i) => (
+            <span
+              key={i}
+              className={
+                "question-progress__step" +
+                (i < index ? " is-done" : "") +
+                (i === index ? " is-current" : "")
+              }
+            />
+          ))}
+        </div>
+
+        <div className="question-main-row">
+          <div className="question-copy">
+            <h2>{currentQuestion.text ?? currentQuestion.question}</h2>
+          </div>
+          <div
+            className={`timer-ring ${timerMood}`}
+            style={{ "--timer-angle": `${progress * 360}deg` }}
+            role="timer"
+          >
+            <div className="timer-ring__inner">
+              <Clock3 size={15} />
+              <strong>{formatNumber(Math.ceil(timeLeft))}</strong>
+              <small>ث</small>
+            </div>
+          </div>
+        </div>
+
+        <div className="answer-prompt">
+          <Sparkles size={18} /> <span>اختار إجابتك</span>
+        </div>
+
+        <div className="answer-grid">
+          {(currentQuestion.options || []).map((option, optIndex) => {
+            const isCorrectOption = optIndex === getCorrectIndex(currentQuestion);
+            const isSelected = answer?.selectedOption === optIndex;
+            let stateClass = "";
+
+            if (answer) {
+              if (isCorrectOption) stateClass = " answer-option--correct";
+              if (isSelected && !answer.isCorrect) stateClass = " answer-option--wrong";
+              if (!isCorrectOption && !isSelected) stateClass = " answer-option--muted";
+            } else if (readOnly) {
+              if (isCorrectOption) stateClass = " answer-option--correct";
+              else stateClass = " answer-option--muted";
+            }
+
+            return (
+              <button
+                key={optIndex}
+                type="button"
+                disabled={Boolean(answer) || readOnly}
+                className={`answer-option answer-option--${
+                  ANSWER_COLORS[optIndex % ANSWER_COLORS.length]
+                }${stateClass}`}
+                onClick={() => handleSubmitAnswer(optIndex)}
+              >
+                <span className="answer-option__key">
+                  {answer && isCorrectOption ? <Check size={19} strokeWidth={3} /> : null}
+                  {answer && isSelected && !answer.isCorrect ? <X size={19} strokeWidth={3} /> : null}
+                  {!answer || (!isCorrectOption && !isSelected) ? ANSWER_LABELS[optIndex] : null}
+                </span>
+                <span className="answer-option__text">{option}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {answer && (
+          <div
+            className={`answer-result ${
+              answer.isCorrect ? "answer-result--good" : "answer-result--retry"
+            }`}
+            role="status"
+          >
+            <span className="answer-result__icon">
+              {answer.isCorrect ? <Check size={20} /> : <Sparkles size={19} />}
+            </span>
+            <span>
+              <strong>
+                {answer.isCorrect
+                  ? `إجابة صحيحة! +${formatNumber(answer.points)} نقطة`
+                  : "إجابة غلط"}
+              </strong>
+              {answer.isCorrect && answer.speedBonus > 0 && (
+                <small>+{formatNumber(answer.speedBonus)} مكافأة سرعة</small>
+              )}
+              {!answer.isCorrect && (
+                <small>
+                  الإجابة الصحيحة: {currentQuestion.options?.[getCorrectIndex(currentQuestion)]}
+                </small>
+              )}
+            </span>
+          </div>
+        )}
+
+        {readOnly && !answer && (
+          <p className="muted" style={{ textAlign: "center", marginTop: 12 }}>
+            الوقت خلص. الإجابة الصحيحة: {currentQuestion.options?.[getCorrectIndex(currentQuestion)]}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -452,7 +432,6 @@ function StudentView() {
     seconds: 3,
   });
 
-  // ── Timer tick: يشتغل بس وقت السؤال ──
   useEffect(() => {
     if (joined?.session?.live?.state !== "question") return;
     setNow(Date.now());
@@ -460,7 +439,6 @@ function StudentView() {
     return () => clearInterval(i);
   }, [joined?.session?.live?.state]);
 
-  // ── Heartbeat: نبلّغ المدرس إننا لسه موجودين كل 20 ثانية ──
   useEffect(() => {
     if (!joined?.session?.id || !joined?.student?.id) return;
     const sessionId = joined.session.id;
@@ -473,12 +451,11 @@ function StudentView() {
       }).catch((err) => console.warn("[heartbeat]", err));
     };
 
-    tick();                              // فوراً
+    tick();
     const i = setInterval(tick, HEARTBEAT_INTERVAL_MS);
     return () => clearInterval(i);
   }, [joined?.session?.id, joined?.student?.id]);
 
-  // ── إعلان الخروج عند قفل التاب / الخروج من الصفحة ──
   useEffect(() => {
     if (!joined?.session?.id || !joined?.student?.id) return;
     const sessionId = joined.session.id;
@@ -490,7 +467,6 @@ function StudentView() {
 
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
-        // رجع للصفحة: نبعت نبضة فوراً + نلغي leftAt (لو كان اتسجل)
         updateStudent(sessionId, studentId, {
           lastSeenAt: Date.now(),
           leftAt: null,
@@ -511,7 +487,6 @@ function StudentView() {
     setReaction({ key, id: Date.now() });
   };
 
-  // ── Subscription: تحديث الحصة + طرد الطالب لو اتحذف ──
   useEffect(() => {
     if (!joined?.session?.id) return;
 
@@ -542,7 +517,6 @@ function StudentView() {
     });
   }, [joined?.session?.id]);
 
-  // ── State-change reactions ──
   const liveStateForReaction = joined?.session?.live?.isLive
     ? joined.session.live.state
     : "not-started";
@@ -553,7 +527,6 @@ function StudentView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [liveStateForReaction, joined?.session?.id]);
 
-  // ── Join (async) ───────────────────────────────
   const handleJoin = async (e) => {
     e.preventDefault();
     setError("");
@@ -570,7 +543,6 @@ function StudentView() {
         (s) => s.name.trim().toLowerCase() === trimmedName.toLowerCase()
       );
 
-      // 👈 لو رجع تاني: نحدّث آخر ظهور ونلغي leftAt
       if (existing) {
         const updated = await updateStudent(session.id, existing.id, {
           lastSeenAt: Date.now(),
@@ -593,8 +565,8 @@ function StudentView() {
         currentStreak: 0,
         finishedAt: null,
         joinedAt: Date.now(),
-        lastSeenAt: Date.now(),   // 👈 جديد
-        leftAt: null,             // 👈 جديد
+        lastSeenAt: Date.now(),
+        leftAt: null,
       };
       const updated = await addStudentToSession(session.id, student);
       if (!updated) return setError("مقدرناش ننضمّك، حاول تاني");
@@ -606,7 +578,6 @@ function StudentView() {
   };
 
   const handleLeave = async () => {
-    // 👈 نعلن الخروج قبل ما نصفّر الحالة
     if (joined?.session?.id && joined?.student?.id) {
       try {
         await updateStudent(joined.session.id, joined.student.id, {
@@ -623,7 +594,6 @@ function StudentView() {
     setReaction(null);
   };
 
-  // ── Handle name change (async) ─────────────────
   const handleChangeName = async (newName) => {
     if (!joined) return;
     try {
@@ -642,7 +612,6 @@ function StudentView() {
     }
   };
 
-  // ── Choose answer (async) ──────────────────────
   const handleChoose = async (optionIndex) => {
     if (!joined) return;
     const { session, student } = joined;
@@ -702,7 +671,6 @@ function StudentView() {
     }
   };
 
-  // ── Join form ─────────────────────────────────
   if (!joined) {
     return (
       <div className="page">
@@ -768,7 +736,6 @@ function StudentView() {
     );
   }
 
-  // ── Joined: live view ─────────────────────────
   const { session } = joined;
   const live = session.live || {};
   const liveState = live.isLive ? live.state : "not-started";
@@ -839,31 +806,6 @@ function StudentView() {
               onDone={() => setReaction(null)}
             />
 
-            <div className="card-heading">
-              <div className="card-heading-title">
-                <span className="card-icon turquoise"><Check size={26} /></span>
-                <div>
-                  <span className="card-eyebrow">أهلاً يا {freshStudent.name}</span>
-                  <h2>{session.title ?? "جلسة"}</h2>
-                </div>
-              </div>
-              <div className="question-stats">
-                <span className="stat-chip">
-                  <Zap size={16} /> {formatNumber(freshStudent.score)} <small>نقطة</small>
-                </span>
-                <span className="stat-chip stat-chip--streak">
-                  <Flame size={16} /> {formatNumber(freshStudent.highestStreak)} <small>streak</small>
-                </span>
-              </div>
-            </div>
-
-            <div className="student-live-stats">
-              <span><Check size={14} /> {formatNumber(freshStudent.correctAnswers)} صح</span>
-              <span><X size={14} /> {formatNumber(freshStudent.wrongAnswers)} غلط</span>
-              <span><ListChecks size={14} /> {formatNumber(answeredCount)}/{formatNumber(questions.length)} سؤال</span>
-              <span><Users size={14} /> {formatNumber(totalStudents)} طالب</span>
-            </div>
-
             {liveState === "not-started" && (
               <div className="live-lobby">
                 <div className="live-lobby-icon"><Users size={36} /></div>
@@ -894,51 +836,167 @@ function StudentView() {
               </div>
             )}
 
-            {liveState === "question" && currentQuestion && (
-              <QuestionPanel
-                question={currentQuestion}
-                index={questionIndex}
-                total={questions.length}
-                answer={currentAnswer}
-                timeLeft={timeLeft}
-                duration={duration}
-                onChoose={handleChoose}
-                heat={freshStudent.currentStreak || 0}
-              />
-            )}
+            {/* 🌟 الكود المدمج الموحد (السؤال / المتوقف / المراجعة) */}
+            {(liveState === "question" || liveState === "paused" || liveState === "reveal") && currentQuestion && (() => {
+              const isQuestion = liveState === "question";
+              const isPaused = liveState === "paused";
+              const isReveal = liveState === "reveal";
+              
+              const readOnly = !isQuestion;
+              const onOptionClick = isQuestion ? handleChoose : (() => {});
+              
+              const displayedTime = isReveal ? 0 : timeLeft;
+              const progress = isReveal ? 0 : (duration > 0 ? Math.max(0, Math.min(1, timeLeft / duration)) : 0);
+              const timerMood = progress <= 0.25 ? "is-danger" : progress <= 0.5 ? "is-warning" : "";
+              
+              const index = questionIndex;
+              const total = questions.length;
+              const heat = freshStudent.currentStreak || 0;
+              const answer = currentAnswer;
 
-            {liveState === "paused" && currentQuestion && (
-              <div>
-                <div className="session-status status-paused" style={{ marginBottom: 12 }}>
-                  <i /> المدرس وقّف الحصة مؤقتاً
+              return (
+                <div>
+                  {isPaused && (
+                    <div className="session-status status-paused" style={{ marginBottom: 12 }}>
+                      <i /> المدرس وقّف الحصة مؤقتاً
+                    </div>
+                  )}
+
+                  <div className="student-question" data-heat={Math.min(4, heat)}>
+                    <div className="question-meta-row">
+                      <div className="question-header-title">
+                        <span>أهلاً يا {freshStudent.name}</span>
+                        <h2>{session.title ?? "جلسة"}</h2>
+                      </div>
+                      
+                      <span className="mini-label">سؤال {formatNumber(index + 1)} من {formatNumber(total)}</span>
+
+                      <div className="question-stats">
+                        <span className="stat-chip">
+                          <Users size={16} /> {formatNumber(totalStudents)} <small>طالب</small>
+                        </span>
+                        <span className="stat-chip" style={{ color: '#10b981' }}>
+                          <Check size={16} style={{ color: '#10b981' }}/> {formatNumber(freshStudent.correctAnswers)} <small style={{ color: '#10b981' }}>صح</small>
+                        </span>
+                        <span className="stat-chip" style={{ color: '#ef4444' }}>
+                          <X size={16} style={{ color: '#ef4444' }}/> {formatNumber(freshStudent.wrongAnswers)} <small style={{ color: '#ef4444' }}>غلط</small>
+                        </span>
+                        <span className="stat-chip">
+                          <Zap size={16} /> {formatNumber(freshStudent.score)} <small>نقطة</small>
+                        </span>
+                        <span className="stat-chip stat-chip--streak">
+                          <Flame size={16} /> {formatNumber(freshStudent.highestStreak)} <small>streak</small>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="question-progress">
+                      {Array.from({ length: total }, (_, i) => (
+                        <span
+                          key={i}
+                          className={
+                            "question-progress__step" +
+                            (i < index ? " is-done" : "") +
+                            (i === index ? " is-current" : "")
+                          }
+                        />
+                      ))}
+                    </div>
+
+                    <div className="question-main-row">
+                      <div className="question-copy">
+                        <h2>{currentQuestion.text ?? currentQuestion.question}</h2>
+                      </div>
+                      <div
+                        className={`timer-ring ${timerMood}`}
+                        style={{ "--timer-angle": `${progress * 360}deg` }}
+                        role="timer"
+                      >
+                        <div className="timer-ring__inner">
+                          <Clock3 size={15} />
+                          <strong>{formatNumber(Math.ceil(displayedTime))}</strong>
+                          <small>ث</small>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="answer-prompt">
+                      <Sparkles size={18} /> <span>اختار إجابتك</span>
+                    </div>
+
+                    <div className="answer-grid">
+                      {(currentQuestion.options || []).map((option, optIndex) => {
+                        const isCorrectOption = optIndex === getCorrectIndex(currentQuestion);
+                        const isSelected = answer?.selectedOption === optIndex;
+                        let stateClass = "";
+
+                        if (answer) {
+                          if (isCorrectOption) stateClass = " answer-option--correct";
+                          if (isSelected && !answer.isCorrect) stateClass = " answer-option--wrong";
+                          if (!isCorrectOption && !isSelected) stateClass = " answer-option--muted";
+                        } else if (readOnly) {
+                          if (isCorrectOption) stateClass = " answer-option--correct";
+                          else stateClass = " answer-option--muted";
+                        }
+
+                        return (
+                          <button
+                            key={optIndex}
+                            type="button"
+                            disabled={Boolean(answer) || readOnly}
+                            className={`answer-option answer-option--${
+                              ANSWER_COLORS[optIndex % ANSWER_COLORS.length]
+                            }${stateClass}`}
+                            onClick={() => onOptionClick(optIndex)}
+                          >
+                            <span className="answer-option__key">
+                              {answer && isCorrectOption ? <Check size={19} strokeWidth={3} /> : null}
+                              {answer && isSelected && !answer.isCorrect ? <X size={19} strokeWidth={3} /> : null}
+                              {!answer || (!isCorrectOption && !isSelected) ? ANSWER_LABELS[optIndex] : null}
+                            </span>
+                            <span className="answer-option__text">{option}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {answer && (
+                      <div
+                        className={`answer-result ${
+                          answer.isCorrect ? "answer-result--good" : "answer-result--retry"
+                        }`}
+                        role="status"
+                      >
+                        <span className="answer-result__icon">
+                          {answer.isCorrect ? <Check size={20} /> : <Sparkles size={19} />}
+                        </span>
+                        <span>
+                          <strong>
+                            {answer.isCorrect
+                              ? `إجابة صحيحة! +${formatNumber(answer.points)} نقطة`
+                              : "إجابة غلط"}
+                          </strong>
+                          {answer.isCorrect && answer.speedBonus > 0 && (
+                            <small>+{formatNumber(answer.speedBonus)} مكافأة سرعة</small>
+                          )}
+                          {!answer.isCorrect && (
+                            <small>
+                              الإجابة الصحيحة: {currentQuestion.options?.[getCorrectIndex(currentQuestion)]}
+                            </small>
+                          )}
+                        </span>
+                      </div>
+                    )}
+
+                    {readOnly && !answer && (
+                      <p className="muted" style={{ textAlign: "center", marginTop: 12 }}>
+                        الوقت خلص. الإجابة الصحيحة: {currentQuestion.options?.[getCorrectIndex(currentQuestion)]}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <QuestionPanel
-                  question={currentQuestion}
-                  index={questionIndex}
-                  total={questions.length}
-                  answer={currentAnswer}
-                  timeLeft={timeLeft}
-                  duration={duration}
-                  onChoose={() => {}}
-                  readOnly
-                  heat={freshStudent.currentStreak || 0}
-                />
-              </div>
-            )}
-
-            {liveState === "reveal" && currentQuestion && (
-              <QuestionPanel
-                question={currentQuestion}
-                index={questionIndex}
-                total={questions.length}
-                answer={currentAnswer}
-                timeLeft={0}
-                duration={duration}
-                onChoose={() => {}}
-                readOnly
-                heat={freshStudent.currentStreak || 0}
-              />
-            )}
+              );
+            })()}
 
             {liveState === "finished" && (
               <div className="live-finished">

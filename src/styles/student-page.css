@@ -1120,3 +1120,43 @@
   flex: 0 0 auto;
   color: #FFD23F;
 }
+
+
+/* ============================================================
+   Question Header Title (Greeting & Session Name)
+   ============================================================ */
+.student-question .question-header-title {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #fff;
+  border: 3px solid #02090D;
+  border-radius: 12px;
+  padding: 4px 16px;
+  box-shadow: 0 3px 0 #02090D;
+  flex: 1 1 auto; /* ياخد المساحة اللي في النص */
+  max-width: max-content; /* عشان ميتفردش على حساب باقي العناصر */
+  min-width: 0;
+  margin: 0 4px; /* مسافة صغيرة بينه وبين الـ mini-label والـ stats */
+}
+
+.student-question .question-header-title span {
+  font: 700 11px var(--font-body);
+  color: #4A5B66; /* لون رمادي غامق للترحيب */
+  line-height: 1.2;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.student-question .question-header-title h2 {
+  font: 700 15px var(--font-display);
+  color: #0B1F2A;
+  margin: 0;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px; /* عشان لو اسم الحصة طويل ميبوظش الشكل */
+}
