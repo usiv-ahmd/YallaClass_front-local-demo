@@ -988,7 +988,10 @@ function StudentView() {
                     غلط: <b>{formatNumber(freshStudent.wrongAnswers)}</b>
                   </p>
                   {freshStudent.highestStreak > 1 && (
-                    <p>أطول سلسلة صح: <b>{formatNumber(freshStudent.highestStreak)}</b> 🔥</p>
+                    <>
+                      <p>اكبر ستريك: <b>{formatNumber(freshStudent.highestStreak)}</b> 🔥</p>
+                      <p>ستريك: <b>{formatNumber(freshStudent.streak)}</b> 🔥</p>
+                    </>
                   )}
                 </div>
               )}
