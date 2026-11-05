@@ -1,105 +1,166 @@
 // hooks/useSessions.js
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
-  readSessions, subscribeSessions, hydrate,
+  readSessions, readMySessions, subscribeSessions, hydrate,
   createSession, updateSession, deleteSession,
   replaceQuestions, uploadSessionFile, removeSessionFile,
   removeStudentFromSession, warnStudentForNameChange,
 } from "../store/sessionStore";
 
 export function useSessions() {
-  const [session, setSession] = useState(() => Object.values(readSessions())[0] ?? null);
+  const [sessions, setSessions] = useState(() => {
+    try {
+      return readMySessions() ?? [];
+    } catch (e) {
+      console.error("[useSessions.initial]", e);
+      return [];
+    }
+  });
+  const [activeSessionId, setActiveSessionId] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // hydrate from backend once
-  useEffect(() => { hydrate(); }, []);
+  useEffect(() => { 
+    hydrate().catch(console.error); 
+  }, []);
 
-  // sync from cache (server push / mock emit / other tabs)
-  useEffect(() => subscribeSessions((all) => {
-    const list = Object.values(all);
-    if (list.length === 0) { setSession(null); return; }
-    setSession((prev) => {
-      if (!prev) return list[0];
-      const fresh = list.find((s) => s.id === prev.id) ?? list[0];
-      return JSON.stringify(prev) === JSON.stringify(fresh) ? prev : fresh;
-    });
+  useEffect(() => subscribeSessions(() => {
+    try {
+      setSessions(readMySessions() ?? []);
+    } catch (e) {
+      console.error("[useSessions.subscribe]", e);
+    }
   }), []);
 
-  const saveSession = async (data) => {
+  const activeSession = useMemo(() => {
+    if (!sessions?.length) return null;
+    if (activeSessionId) {
+      const found = sessions.find((s) => s.id === activeSessionId);
+      if (found) return found;
+    }
+    return sessions[0] ?? null;
+  }, [sessions, activeSessionId]);
+
+  const setActiveSession = useCallback((idOrSession) => {
+    const id = typeof idOrSession === "string" ? idOrSession : idOrSession?.id;
+    setActiveSessionId(id ?? null);
+  }, []);
+
+  const setSession = useCallback((updatedOrFn) => {
+    setSessions((prev) => {
+      const safePrev = prev ?? [];
+      const current = safePrev.find((s) => s.id === activeSessionId) ?? safePrev[0] ?? null;
+      const updated = typeof updatedOrFn === "function" ? updatedOrFn(current) : updatedOrFn;
+      if (!updated?.id) return safePrev;
+      const idx = safePrev.findIndex((s) => s.id === updated.id);
+      if (idx === -1) return [...safePrev, updated];
+      const next = [...safePrev];
+      next[idx] = updated;
+      return next;
+    });
+  }, [activeSessionId]);
+
+  const saveSession = async (data, opts = {}) => {
     try {
-      const updated = session?.id
-        ? await updateSession(session.id, data)
-        : await createSession(data);
-      if (updated?.id) setSession(updated);
-      return updated;
+      const updated = (opts.isNew || !activeSession?.id)
+        ? await createSession(data)
+        : await updateSession(activeSession.id, data);
+        
+      if (updated?.id) {
+        setSessions((prev) => {
+          const safePrev = prev ?? [];
+          const idx = safePrev.findIndex((s) => s.id === updated.id);
+          if (idx === -1) return [...safePrev, updated];
+          const next = [...safePrev];
+          next[idx] = updated;
+          return next;
+        });
+        setActiveSessionId(updated.id);
+        return updated;
+      }
+      return null;
     } catch (e) {
-      console.error("[saveSession]", e);
+      console.error("[useSessions.saveSession] Error:", e);
       return null;
     }
   };
 
   const resetSession = async () => {
     try {
-      if (session?.id) await deleteSession(session.id);
-    } catch (e) { console.error("[resetSession]", e); }
-    setSession(null);
+      if (activeSession?.id) {
+        await deleteSession(activeSession.id);
+      }
+      setSessions((prev) => (prev ?? []).filter((s) => s.id !== activeSession?.id));
+      setActiveSessionId(null);
+      return true;
+    } catch (e) { 
+      console.error("[useSessions.resetSession] Error:", e); 
+      return false;
+    }
   };
 
   const updateQuestions = async (nextQuestions) => {
-    if (!session?.id) return null;
+    if (!activeSession?.id) return null;
     try {
-      const updated = await replaceQuestions(session.id, nextQuestions);
+      const updated = await replaceQuestions(activeSession.id, nextQuestions);
       if (updated?.id) setSession(updated);
       return updated;
-    } catch (e) {
-      console.error("[updateQuestions]", e);
-      return null;
+    } catch (e) { 
+      console.error("[useSessions.updateQuestions]", e); 
+      return null; 
     }
   };
 
   const uploadFile = async (file) => {
-    if (!file || !session?.id) return;
+    if (!file || !activeSession?.id) return;
     setIsUploading(true);
     try {
-      const res = await uploadSessionFile(session.id, file);
+      const res = await uploadSessionFile(activeSession.id, file);
       if (res?.session?.id) setSession(res.session);
-    } catch (e) {
-      console.error("[uploadFile]", e);
-      alert("حصل خطأ أثناء رفع الملف");
-    } finally {
-      setIsUploading(false);
+    } catch (e) { 
+      console.error("[useSessions.uploadFile]", e); 
+      alert("حصل خطأ أثناء رفع الملف"); 
+    } finally { 
+      setIsUploading(false); 
     }
   };
 
   const removeFile = async (idx) => {
-    const file = session?.files?.[idx];
-    if (!file?.id || !session?.id) return;
+    const file = activeSession?.files?.[idx];
+    if (!file?.id || !activeSession?.id) return;
     try {
-      const updated = await removeSessionFile(session.id, file.id);
+      const updated = await removeSessionFile(activeSession.id, file.id);
       if (updated?.id) setSession(updated);
-    } catch (e) { console.error("[removeFile]", e); }
+    } catch (e) { console.error("[useSessions.removeFile]", e); }
   };
 
   const removeStudent = async (studentId) => {
-    if (!session?.id) return;
+    if (!activeSession?.id) return;
     try {
-      const updated = await removeStudentFromSession(session.id, studentId);
+      const updated = await removeStudentFromSession(activeSession.id, studentId);
       if (updated?.id) setSession(updated);
-    } catch (e) { console.error("[removeStudent]", e); }
+    } catch (e) { console.error("[useSessions.removeStudent]", e); }
   };
 
   const warnStudentForNameChangeLocal = async (studentId) => {
-    if (!session?.id) return;
+    if (!activeSession?.id) return;
     try {
-      const updated = await warnStudentForNameChange(session.id, studentId);
+      const updated = await warnStudentForNameChange(activeSession.id, studentId);
       if (updated?.id) setSession(updated);
-    } catch (e) { console.error("[warnStudentForNameChange]", e); }
+    } catch (e) { console.error("[useSessions.warnStudentForNameChange]", e); }
   };
 
   return {
-    session, setSession, isUploading,
-    saveSession, resetSession,
-    updateQuestions, uploadFile, removeFile,
+    session: activeSession,
+    sessions: sessions ?? [],
+    setSession,
+    setActiveSession,
+    isUploading,
+
+    saveSession,
+    resetSession,
+    updateQuestions,
+    uploadFile,
+    removeFile,
     removeStudent,
     warnStudentForNameChange: warnStudentForNameChangeLocal,
   };

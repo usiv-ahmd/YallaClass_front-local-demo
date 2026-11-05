@@ -1,5 +1,6 @@
 // src/services/api/mockBackend.js
 import { readMock, writeMock, mockEmit } from "./mockStore";
+import { getCurrentTeacherId } from "./auth";
 
 const delay = (v) => new Promise((res) => setTimeout(() => res(v), 120));
 const uid = (p) => `${p}-${Date.now()}-${Math.random().toString(16).slice(2, 6)}`;
@@ -59,8 +60,27 @@ const save = (session) => {
 
 // ── Sessions ─────────────────────────────────
 export const mockSessionsApi = {
-  list: async () => delay(Object.values(readMock())),
-  get:  async (id) => delay(readMock()[id] ?? null),
+  // ترجع جلسات المدرس الحالي بس — مع migration للجلسات القديمة اللي مفيهاش teacherId
+  list: async () => {
+    const me = getCurrentTeacherId();
+    const all = readMock();
+    let changed = false;
+    for (const id of Object.keys(all)) {
+      if (!all[id].teacherId) {
+        all[id].teacherId = me;
+        changed = true;
+      }
+    }
+    if (changed) {
+      writeMock(all);
+      mockEmit(all);
+    }
+    return delay(Object.values(all).filter((s) => s.teacherId === me));
+  },
+
+  get: async (id) => delay(readMock()[id] ?? null),
+
+  // البحث بالكود بيبقى global عشان الطالب ينضم لأي جلسة
   findByCode: async (code) => {
     const t = String(code ?? "").trim().toLowerCase();
     return delay(
@@ -69,14 +89,25 @@ export const mockSessionsApi = {
       ) ?? null
     );
   },
-  create: async (payload) =>
-    delay(save({ ...payload, id: payload.id ?? uid("session") })),
+
+  create: async (payload) => {
+    const me = getCurrentTeacherId();
+    return delay(
+      save({
+        ...payload,
+        id: payload.id ?? uid("session"),
+        teacherId: payload.teacherId ?? me,
+      })
+    );
+  },
+
   update: async (id, patch) => {
     const all = readMock();
     const s = all[id];
     if (!s) return delay(null);
     return delay(save({ ...s, ...patch }));
   },
+
   remove: async (id) => {
     const all = readMock();
     delete all[id];
@@ -221,7 +252,6 @@ export const mockStudentsApi = {
     const q = getQ(s).find((x) => x.id === questionId);
     if (!q) return delay(null);
 
-    // تحقق من القفل (الجولة في question أو reopened مفتوح للطالب)
     const live = s.live || {};
     const alreadyAnswered = Boolean(s.answers?.[studentId]?.[questionId]);
     if (live.state === "question" && alreadyAnswered) return delay(null);
@@ -262,7 +292,7 @@ export const mockStudentsApi = {
   },
 };
 
-// ── Live transitions (startedAt-authoritative) ──
+// ── Live transitions ────────────────────────
 const live = (next) => async (sessionId) => {
   const all = readMock();
   const s = all[sessionId];
@@ -318,12 +348,7 @@ export const mockLiveApi = {
     return delay(
       save({
         ...s,
-        live: {
-          ...s.live,
-          state: "paused",
-          timeLeft: remaining,
-          pausedAt: Date.now(),
-        },
+        live: { ...s.live, state: "paused", timeLeft: remaining, pausedAt: Date.now() },
       })
     );
   },
@@ -336,17 +361,11 @@ export const mockLiveApi = {
     const q = getQ(s)[idx];
     const duration = Number(q?.duration) || 30;
     const remaining = s.live.timeLeft ?? duration;
-    // نرجع startedAt للخلف عشان الوقت المتبقي يطابق remaining
     const newStartedAt = Date.now() - (duration - remaining) * 1000;
     return delay(
       save({
         ...s,
-        live: {
-          ...s.live,
-          state: "question",
-          startedAt: newStartedAt,
-          pausedAt: null,
-        },
+        live: { ...s.live, state: "question", startedAt: newStartedAt, pausedAt: null },
       })
     );
   },
@@ -434,15 +453,13 @@ export const mockLiveApi = {
     return delay(
       save({
         ...s,
-        reopenedFor: s.reopenedFor
-          ? { ...s.reopenedFor, allowEdit }
-          : null,
+        reopenedFor: s.reopenedFor ? { ...s.reopenedFor, allowEdit } : null,
       })
     );
   },
 };
 
-// ── Seed أول مرة ─────────────────────────────
+// ── Seed أول مرة — نـ stamp المدرس الحالي ─────────
 export async function bootstrapMock() {
   const all = readMock();
   if (Object.keys(all).length > 0) return;
@@ -450,8 +467,9 @@ export async function bootstrapMock() {
     const { initialMockData } = await import("../../mock/mockData.js");
     const seed = initialMockData?.session;
     if (seed?.id) {
-      writeMock({ [seed.id]: seed });
-      mockEmit({ [seed.id]: seed });
+      const withTeacher = { ...seed, teacherId: getCurrentTeacherId() };
+      writeMock({ [seed.id]: withTeacher });
+      mockEmit({ [seed.id]: withTeacher });
     }
   } catch (e) {
     console.warn("[mockBackend] bootstrapMock skipped:", e?.message);

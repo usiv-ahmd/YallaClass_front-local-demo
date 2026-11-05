@@ -43,15 +43,15 @@ export default function SessionFormWindow({ onClose, onSubmit, initialData }) {
         </div>
 
         <form className="modal-content" onSubmit={handleSubmit}>
-          <label className="create-session-field">
-            اسم الجلسة
+          <label htmlFor="session-code">اسم الجلسة</label>
+          <div className="input-wrap">
             <input autoFocus required maxLength={80} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="مثال: مراجعة قوانين الحركة" />
-          </label>
+          </div>
 
-          <label className="create-session-field">
-            المادة / الصف
+          <label htmlFor="session-code">المادة / الصف</label>
+          <div className="input-wrap">
             <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="مثال: الفيزياء · الصف الثاني الثانوي" />
-          </label>
+          </div>
 
           <div className="modal-actions">
             <button className="button modal-button white" type="button" onClick={onClose}>

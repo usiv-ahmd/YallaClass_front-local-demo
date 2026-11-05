@@ -1,7 +1,9 @@
+// src/services/api/sessionsApi.js
 import { http } from "./client";
 import { EP } from "./endpoints";
 
 export const sessionsApi = {
+  meSessions:     ()                  => http.get(EP.meSessions()),
   list:           ()                  => http.get(EP.sessions()),
   get:            (id)                => http.get(EP.sessionById(id)),
   findByCode:     (code)              => http.get(EP.sessionByCode(code)),

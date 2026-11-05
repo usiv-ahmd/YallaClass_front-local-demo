@@ -10,7 +10,7 @@
 }
 
 .join-card {
-  max-width: 730px;
+  max-width: 540px;
 }
 
 
@@ -21,54 +21,6 @@
   gap: 12px;
 }
 
-.join-form label {
-  color: var(--C-yalla-text-secondary);
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-
-.join-input-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 48px;
-  padding: 0 14px;
-  background: var(--C-yalla-fg);
-  border: var(--yalla-border);
-  border-radius: var(--yalla-radius-sm);
-  box-shadow: var(--yalla-shadow-sm);
-  transition: box-shadow 0.12s ease;
-}
-
-.join-input-wrap:focus-within {
-  box-shadow: var(--yalla-shadow-button);
-}
-
-.join-input-wrap svg {
-  flex: 0 0 auto;
-  color: var(--C-yalla-primary-strong);
-}
-
-.join-input-wrap input {
-  flex: 1 1 auto;
-  min-width: 0;
-  height: 44px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--C-yalla-bg);
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  outline: none;
-}
-
-.join-input-wrap input::placeholder {
-  color: rgba(11, 31, 42, 0.4);
-  font-weight: 600;
-  letter-spacing: 0;
-}
-
 .join-submit {
   width: 100%;
   margin-top: 4px;
@@ -77,8 +29,6 @@
 .join-submit svg {
   flex: 0 0 auto;
 }
-
-
 
 /* ========== Sessions Grid (Container) ========== */
 .session-grid {
@@ -1173,107 +1123,4 @@
 .instructor-sidebar .leaderboard-footer svg {
   flex: 0 0 auto;
   color: #FFD23F;
-}
-
-/* ── Name Change Warning Modal ───────────────── */
-.name-warning-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: rgba(15, 23, 42, 0.72);
-  backdrop-filter: blur(6px);
-  animation: name-warning-fade 0.2s ease;
-}
-
-@keyframes name-warning-fade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-.name-warning-card {
-  width: 100%;
-  max-width: 420px;
-  padding: 32px 26px 24px;
-  text-align: center;
-  animation: name-warning-pop 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-@keyframes name-warning-pop {
-  from { opacity: 0; transform: scale(0.94); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-.name-warning-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 76px;
-  height: 76px;
-  border-radius: 50%;
-  background: rgba(220, 38, 38, 0.12);
-  color: #dc2626;
-  margin-bottom: 16px;
-}
-
-.name-warning-card h2 {
-  margin: 0 0 10px;
-  font-size: 22px;
-  color: #0f172a;
-}
-
-.name-warning-copy {
-  margin: 0 0 22px;
-  color: #475569;
-  line-height: 1.65;
-  font-size: 14px;
-}
-
-.name-warning-copy b {
-  color: #0f172a;
-}
-
-.name-warning-form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.name-warning-form input {
-  padding: 12px 14px;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 10px;
-  font-size: 15px;
-  text-align: center;
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-.name-warning-form input:focus {
-  border-color: #0d9488;
-}
-
-.name-warning-form button[type="submit"] {
-  padding: 12px 14px;
-  font-size: 15px;
-}
-
-.name-warning-error {
-  margin: 0;
-  color: #dc2626;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.name-warning-leave {
-  font-size: 13px;
-  color: #64748b;
-  padding: 6px 12px;
 }

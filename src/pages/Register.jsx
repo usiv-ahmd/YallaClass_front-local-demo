@@ -26,9 +26,6 @@ export default function Register() {
   return (
     <div className="card auth-container">
       <div className="auth-header">
-        <span className="auth-badge">
-          <Presentation size={16} /> حساب مدرس
-        </span>
         <h2>إنشاء حساب مدرس</h2>
         <p>املأ بياناتك عشان تنشئ حساب وتحكم في حصصك.</p>
       </div>

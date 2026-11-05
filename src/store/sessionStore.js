@@ -1,6 +1,7 @@
 // src/store/sessionStore.js
 import { api, API } from "../services/api";
 import { subscribeBroadcast } from "../services/api/mockStore";
+import { getCurrentTeacherId } from "../services/api/auth";
 
 const CACHE_KEY = "live-quiz:sessions-cache";
 const EVENT     = "live-quiz:sessions-updated";
@@ -28,12 +29,15 @@ function drop(id) {
 
 export function readSessions() { return cache; }
 
-// ── Subscription: CustomEvent (same-tab) + storage + BroadcastChannel (cross-tab) ──
+export function readMySessions() {
+  const me = getCurrentTeacherId();
+  return Object.values(cache).filter((s) => !s.teacherId || s.teacherId === me);
+}
+
 export function subscribeSessions(cb) {
   const handler = (e) => {
-    if (e?.detail && typeof e.detail === "object") {
-      cache = e.detail;                        // CustomEvent / fresh payload
-    } else {
+    if (e?.detail && typeof e.detail === "object") cache = e.detail;
+    else {
       try {
         const fresh = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}");
         if (fresh && typeof fresh === "object") cache = fresh;
@@ -41,13 +45,7 @@ export function subscribeSessions(cb) {
     }
     cb(cache);
   };
-
-  const bcHandler = (data) => {
-    if (data && typeof data === "object") {
-      cache = data;
-      cb(cache);
-    }
-  };
+  const bcHandler = (data) => { if (data && typeof data === "object") { cache = data; cb(cache); } };
 
   window.addEventListener("storage", handler);
   window.addEventListener(EVENT,    handler);
@@ -60,19 +58,17 @@ export function subscribeSessions(cb) {
   };
 }
 
-// ── Boot: ⚠️ ما نـ clobber ش data الـ cache وقتها ──
 export async function hydrate() {
   try {
     if (API.useMock) {
       const { bootstrapMock } = await import("../services/api/mockBackend");
       await bootstrapMock();
     }
-    const list = await api.sessions.list();
-    // merge: نضيف الجديد بس، ما نلمسش اللي موجود (اللي جاله updates من events)
+    const list = await (api.sessions.meSessions
+      ? api.sessions.meSessions()
+      : api.sessions.list());
     const merged = { ...cache };
-    for (const s of list) {
-      if (!merged[s.id]) merged[s.id] = s;
-    }
+    for (const s of list) merged[s.id] = s;
     cache = merged;
     emit();
   } catch (e) {
@@ -80,7 +76,6 @@ export async function hydrate() {
   }
 }
 
-// ── Session lifecycle ─────────────────────────
 export async function findSessionByCode(code) {
   const local = Object.values(cache).find(
     (s) => String(s.code ?? "").toLowerCase() === String(code ?? "").trim().toLowerCase()
@@ -90,6 +85,7 @@ export async function findSessionByCode(code) {
   return s ? put(s) : null;
 }
 
+// ── Session lifecycle ─────────────────────
 export async function createSession(payload) {
   const s = await api.sessions.create(payload);
   return put(s);
@@ -121,27 +117,23 @@ export async function removeSessionFile(sessionId, fileId) {
   return put(s);
 }
 
-// ── Students ─────────────────────────────────
+// ── Students ─────────────────────────────
 export async function addStudentToSession(sessionId, student) {
   const s = await api.students.join(sessionId, student);
   return put(s);
 }
-
 export async function updateStudent(sessionId, studentId, patch) {
   const s = await api.students.update(sessionId, studentId, patch);
   return put(s);
 }
-
 export async function removeStudentFromSession(sessionId, studentId) {
   const s = await api.students.remove(sessionId, studentId);
   return put(s);
 }
-
 export async function warnStudentForNameChange(sessionId, studentId) {
   const s = await api.students.warn(sessionId, studentId);
   return put(s);
 }
-
 export async function submitAnswer({ sessionId, studentId, questionId, selectedOption, timeLeft }) {
   const res = await api.students.submitAnswer(sessionId, {
     studentId, questionId, selectedOption, timeLeft,
@@ -150,7 +142,7 @@ export async function submitAnswer({ sessionId, studentId, questionId, selectedO
   return res;
 }
 
-// ── Live transitions ─────────────────────────
+// ── Live transitions ─────────────────────
 const liveOp = (fn) => async (sessionId, ...args) => put(await fn(sessionId, ...args));
 
 export const liveOps = {

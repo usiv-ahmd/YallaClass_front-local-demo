@@ -1,4 +1,8 @@
+// src/services/api/endpoints.js
 export const EP = {
+  // ── My sessions (teacher-scoped) ─────
+  meSessions:         ()            => `/me/sessions`,
+
   // ── Sessions ─────────────────────────
   sessions:           ()            => `/sessions`,
   sessionById:        (id)          => `/sessions/${id}`,

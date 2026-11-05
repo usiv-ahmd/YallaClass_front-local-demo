@@ -1,8 +1,8 @@
 // src/pages/InstructorView.jsx
+import { useState, useEffect } from "react";
 import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, ListChecks, Play, Pause, SkipForward,
     Eye, LogOut, Check, CheckCheck, X, RotateCcw, Lock, Trash2, UploadCloud, FileText, BookOpen, Settings2,
     BookOpenCheck, Minus, Clock, Timer, ClipboardList, Trophy, Pencil, Bell } from "lucide-react";
-
 
   import SessionFormWindow from "../modals/SessionFormWindow.jsx";
   import QuestionFormWindow from "../modals/QuestionFormWindow.jsx";
@@ -18,17 +18,42 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
 
   import "../styles/Instructor-page.css";
 
+  // الطالب بيتعبر "موجود" لو آخر نبضة أقل من 45 ثانية
+  const ONLINE_THRESHOLD_MS = 45_000;
+
+  // ─────────────────────────────────────────────
+  //  Helper: حساب حالة الطالب
+  // ─────────────────────────────────────────────
+  function isStudentOnline(student, now) {
+    if (!student) return false;
+    if (student.leftAt) return false;                              // خرج صريح
+    if (!student.lastSeenAt) return false;                         // ما دخلش بعد
+    return (now - student.lastSeenAt) < ONLINE_THRESHOLD_MS;       // آخر نبضة حديثة
+  }
+
   function Leaderboard({ students = [], onWarn, onDelete }) {
     const attendedCount = students.filter((s) => s.attended).length;
+
+    // ⏱️ الآن — بيتحدّث كل 10 ثواني عشان نحسب online/offline بدقة
+    const [now, setNow] = useState(() => Date.now());
+    useEffect(() => {
+      const i = setInterval(() => setNow(Date.now()), 10_000);
+      return () => clearInterval(i);
+    }, []);
+
+    const onlineCount = students.filter((s) => isStudentOnline(s, now)).length;
 
     const handleWarn = (student) => {
       if (student.warnedForNameChangeAt) return;
       onWarn?.(student.id);
     };
 
-    const handleDelete = (student) => {
+    const handleAction = (student) => {
+      const online = isStudentOnline(student, now);
       const ok = window.confirm(
-        `حذف حساب "${student.name}" نهائيًا؟\nسيتم إخراجه من الحصة الحالية فورًا.`
+        online
+          ? `إخراج "${student.name}" من الحصة الحية؟\n(يمكنه الرجوع بكود الحصة)`
+          : `حذف حساب "${student.name}" نهائيًا؟\nسيتم إخراجه من الحصة الحالية فورًا.`
       );
       if (ok) onDelete?.(student.id);
     };
@@ -42,7 +67,16 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
             </div>
             <h2>الحضور والتفاعل</h2>
           </div>
-          <span className="count-pill">{attendedCount}</span>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <span className="count-pill" title="عدد الحاضرين">{attendedCount}</span>
+            <span
+              className="count-pill"
+              title="الطلاب الموجودون الآن"
+              style={{ background: "#10b981", color: "#fff" }}
+            >
+              {onlineCount} متصل
+            </span>
+          </div>
         </div>
         <table className="students-table">
           <thead>
@@ -56,16 +90,32 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
               <th className="col-score">Score</th>
               <th className="col-streak">Streak</th>
               <th className="col-warn">تحذير</th>
-              <th className="col-delete">طرد</th>
+              <th className="col-delete">إجراء</th>
             </tr>
           </thead>
           <tbody>
             {students.map((student, index) => {
-              const warned = !!student.warnedForNameChangeAt;
+              const warned  = !!student.warnedForNameChangeAt;
+              const online  = isStudentOnline(student, now);
               return (
-                <tr key={student.id}>
+                <tr key={student.id} className={online ? "student-row--online" : "student-row--offline"}>
                   <td className="col-rank">{index + 1}</td>
-                  <td className="col-name">{student.name}</td>
+                  <td className="col-name">
+                    <span
+                      style={{
+                        display: "inline-block",
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        marginLeft: 6,
+                        background: online ? "#10b981" : "#d1d5db",
+                        boxShadow: online ? "0 0 0 3px rgba(16,185,129,0.2)" : "none",
+                      }}
+                      title={online ? "متصل الآن" : "غير متصل"}
+                      aria-hidden="true"
+                    />
+                    {student.name}
+                  </td>
                   <td className="col-correct">{student.correctAnswers}</td>
                   <td className="col-wrong">{student.wrongAnswers}</td>
                   <td className="col-attended">
@@ -95,12 +145,12 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
                   <td className="col-delete">
                     <button
                       type="button"
-                      className="button icon-button delete-student-button"
-                      onClick={() => handleDelete(student)}
-                      title="حذف الحساب وإخراجه من الحصة"
-                      aria-label={`حذف حساب ${student.name}`}
+                      className={`button icon-button ${online ? "kick-student-button" : "delete-student-button"}`}
+                      onClick={() => handleAction(student)}
+                      title={online ? "إخراج الطالب من الحصة الحية" : "حذف الحساب نهائيًا"}
+                      aria-label={online ? `إخراج ${student.name}` : `حذف حساب ${student.name}`}
                     >
-                      <LogOut size={15} />
+                      {online ? <LogOut size={15} /> : <Trash2 size={15} />}
                     </button>
                   </td>
                 </tr>
@@ -113,16 +163,20 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
   }
 
   function InstructorView() {
-    const data        = useSessions();      // ← مفيش initialMockData بعد كده
-    const editor      = useSessionEditor(data);
-    const live        = useLiveSession(data.session, data.setSession);
+    const data   = useSessions();
+    const editor = useSessionEditor(data);
+    const live   = useLiveSession(data.session, data.setSession);
 
     const question = useQuestionsForm({
       session: data.session,
       updateQuestions: data.updateQuestions,
     });
 
-    const countdown = useCountdown({ active: live.isLive && live.liveState === "countdown", seconds: 3, onEnd: live.startQuestion });
+    const countdown = useCountdown({
+      active: live.isLive && live.liveState === "countdown",
+      seconds: 3,
+      onEnd: live.startQuestion,
+    });
 
     // ── Handlers ─────────────────────────────────────
     const handleFileUpload = async (e) => {
@@ -159,7 +213,7 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
 
               <div className="heading-meta">
                 <button className="button button-primary red" type="button" onClick={live.requestEndLive}>
-                  إنهاء الجلسة والعودة
+                  إنهاء الحصة والعودة
                 </button>
                 <div className="session-status">
                   <span className={`chip session-status ${live.statusView.cls}`}>
@@ -198,7 +252,7 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
                     <div className="live-controls-buttons">
                       {live.liveState === "lobby" && (
                         <button className="button button-primary turquoise" onClick={live.startCountdown}>
-                          <Play size={16} /> ابدأ الجلسة
+                          <Play size={16} /> ابدأ الحصة
                         </button>
                       )}
                       {live.liveState === "countdown" && (
@@ -251,7 +305,7 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
                             <RotateCcw size={16} /> افتح للمتأخرين ({live.pendingStudents.length})
                           </button>
                           <button className="button ghost" type="button" onClick={live.requestEndLive}>
-                            <LogOut size={16} /> خروج وإغلاق الجلسة
+                            <LogOut size={16} /> خروج وإغلاق الحصة
                           </button>
                         </>
                       )}
@@ -271,7 +325,7 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
                   <section className="card sidebar-card">
                     <h3><ListChecks size={16} /> الأسئلة ({live.totalQuestions})</h3>
                     {liveQuestions.length === 0 ? (
-                      <p className="muted">مفيش أسئلة في الجلسة دي.</p>
+                      <p className="muted">مفيش أسئلة في الحصة دي.</p>
                     ) : (
                       <ol className="live-questions-list">
                         {liveQuestions.map((item, idx) => {
@@ -298,7 +352,7 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
                         <div className="live-lobby">
                           <div className="live-lobby-icon"><Users size={42} /></div>
                           <h2>مستنيين الطلاب ينضموا...</h2>
-                          <p>لما تجهز، اضغط <b>ابدأ الجلسة</b>. كود الفصل: <b>{live.liveSession?.code ?? "—"}</b></p>
+                          <p>لما تجهز، اضغط <b>ابدأ الحصة</b>. كود الفصل: <b>{live.liveSession?.code ?? "—"}</b></p>
                           <div className="live-lobby-pulse" />
                         </div>
                       )}
@@ -366,7 +420,7 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
                           <p>
                             {live.pendingStudents.length > 0
                               ? `لسه ${live.pendingStudents.length} من ${students.length} طالب مكملوش.`
-                              : "كل الطلاب خلصوا — تقدر تقفل الجلسة."}
+                              : "كل الطلاب خلصوا — تقدر تقفل الحصة."}
                           </p>
                           {live.pendingStudents.length > 0 && (
                             <button type="button" className="button button-primary turquoise" onClick={live.reopenModal.open}>
@@ -376,8 +430,8 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
                         </div>
                       )}
                       {live.liveState === "reopened" && (
-                        <div className="live-reopened">
-                          <div className="live-lobby-icon"><RotateCcw size={42} /></div>
+                        <div className="live-finished">
+                          <RotateCcw size={42} />
                           <h2>الجولة مفتوحة للمتأخرين</h2>
                           <p>مفتوحة لـ <b>{live.pendingStudents.length}</b> من <b>{students.length}</b> طالب لسه مكملوش.</p>
                           <span className={`badge ${live.allowAnswerEdit ? "badge-warn" : "badge-success"}`}>
@@ -433,7 +487,7 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
             </div>
             <div className="heading-meta">
               {!data.session ? (
-                <button className="button button-primary red" type="button" onClick={editor.formModal.open}>
+                <button className="button button-primary red" type="button" onClick={editor.formModal.openCreate}>
                   <Plus size={17} /> حصة جديدة
                 </button>
               ) : (
@@ -458,7 +512,7 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
                     حدّد ميعاد الحصة وبعدها أضف أسئلتك اليدوية. او ارفع الملف وسيب الذكاء الاصطناعي يولد لك اسئله.<br/>
                     ابعت للطلاب كود الحصه.
                   </p>
-                  <button className="button button-primary turquoise" type="button" onClick={editor.formModal.open}>
+                  <button className="button button-primary turquoise" type="button" onClick={editor.formModal.openCreate}>
                     <Plus size={17} /> إنشاء حصة جديدة
                   </button>
                 </div>
@@ -492,7 +546,7 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
                             الحصة قابله للبدء
                           </span>
                         )}
-                        <button className="button icon-button open-delete-modal-button" type="button" onClick={() => editor.deleteModal.open} aria-label="حذف الحصة" title="حذف الحصة">
+                        <button className="button icon-button open-delete-modal-button" type="button" onClick={editor.deleteModal.open} aria-label="حذف الحصة" title="حذف الحصة">
                           <Trash2 size={17} />
                         </button>
 
@@ -502,8 +556,26 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
                       </div>
                     </div>
                     <div className="session-meta-row">
-                      <button className="button open-edit-modal-button turquoise" type="button" onClick={editor.formModal.open}>
+                      {data.sessions.length > 1 && (
+                        <select
+                          className="session-select"
+                          value={data.session?.id || ""}
+                          onChange={(e) => data.setActiveSession(e.target.value)}
+                          title="بدّل الحصة النشطة"
+                          style={{ minWidth: 200, padding: "6px 10px", borderRadius: 8 }}
+                        >
+                          {data.sessions.map((s) => (
+                            <option key={s.id} value={s.id}>
+                              {s.title} — {s.code}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                      <button className="button open-edit-modal-button turquoise" type="button" onClick={editor.formModal.openEdit}>
                         <Settings2 size={15} /> تفاصيل الحصة
+                      </button>
+                      <button className="button open-new-session-button" type="button" onClick={editor.formModal.openCreate}>
+                        <Plus size={15} /> جلسة جديدة
                       </button>
                     </div>
                   </div>
@@ -632,7 +704,11 @@ import { CalendarDays, ChevronLeft, Clock3, Plus, Sparkles, UsersRound, Users, L
         </div>
 
         {editor.formModal.isOpen && (
-          <SessionFormWindow initialData={data.session} onClose={editor.formModal.close} onSubmit={editor.saveSession}/>
+          <SessionFormWindow
+            initialData={editor.formModal.mode === "edit" ? data.session : null}
+            onClose={editor.formModal.close}
+            onSubmit={editor.saveSession}
+          />
         )}
 
         {editor.deleteModal.isOpen && (

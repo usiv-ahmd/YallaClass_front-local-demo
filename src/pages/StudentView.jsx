@@ -4,13 +4,14 @@ import {
   KeyRound, ArrowLeft, AlertCircle, Check, Clock3, Zap, Flame,
   X, Sparkles, Trophy, Users, ListChecks, Timer,
   TrendingUp,
+  CheckCircle,
 } from "lucide-react";
 import {
   findSessionByCode,
   addStudentToSession,
   subscribeSessions,
   updateStudent,
-  submitAnswer,        // ← من الـ store دلوقتي (async)
+  submitAnswer,
 } from "../store/sessionStore";
 import { useCountdown } from "../hooks/useCountdown.js";
 import { Reaction } from "../Components/Reactions.jsx";
@@ -20,6 +21,9 @@ import "../styles/reactions.css";
 
 const ANSWER_LABELS = ["أ", "ب", "ج", "د", "هـ", "و"];
 const ANSWER_COLORS = ["turquoise", "yellow", "blue", "red"];
+
+// كل 20 ثانية نبعت "أنا موجود" — المدرس بيعتبر الطالب online لو آخر seen أقل من 45 ثانية
+const HEARTBEAT_INTERVAL_MS = 20_000;
 
 const formatNumber = (n) => Number(n || 0).toLocaleString("en-US");
 
@@ -38,7 +42,7 @@ function getCorrectIndex(question) {
 }
 
 // ─────────────────────────────────────────────
-//  Name Change Warning Modal (زي ما هي)
+//  Name Change Warning Modal
 // ─────────────────────────────────────────────
 function NameChangeWarning({ currentName, onSave, onLeave }) {
   const [newName, setNewName] = useState("");
@@ -57,53 +61,57 @@ function NameChangeWarning({ currentName, onSave, onLeave }) {
   };
 
   return (
-    <div
-      className="name-warning-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="name-warning-title"
-    >
-      <div className="card name-warning-card">
-        <div className="name-warning-icon">
-          <AlertCircle size={44} />
-        </div>
-        <h2 id="name-warning-title">اسمك مخالف</h2>
-        <p className="name-warning-copy">
-          المدرس بعتلك تحذير إن اسمك الحالي <b>«{currentName}»</b> مخالف.
-          لازم تغيّره عشان تكمل في الجلسة.
-        </p>
-        <form onSubmit={handleSubmit} className="name-warning-form" noValidate>
-          <input
-            type="text"
-            placeholder="اكتب اسمك الجديد"
-            value={newName}
-            onChange={(e) => { setNewName(e.target.value); setError(""); }}
-            maxLength={24}
-            autoFocus
-          />
-          {error && (
-            <p className="name-warning-error">
-              <AlertCircle size={14} /> {error}
-            </p>
-          )}
-          <button className="button button-primary turquoise" type="submit">
-            احفظ الاسم الجديد
+    <div className="opened-window-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <section className="card modal-window" role="dialog" aria-modal="true" aria-labelledby="name-warning-title">
+        <div className="card-heading">
+          <div className="card-heading-title">
+            <div className="card-icon red"><AlertCircle size={22} /></div>
+            <div>
+              <h2 className="modal-title">اسمك مخالف</h2>
+            </div>
+          </div>
+          <button className="modal-close-button" type="button" onClick={onLeave} aria-label="إغلاق">
+            <X size={17} />
           </button>
+        </div>
+
+        <form className="modal-content" onSubmit={handleSubmit}>
+          <p>
+            المدرس بعتلك تحذير إن اسمك الحالي <b>«{currentName}»</b> مخالف.
+            لازم تغيّره عشان تكمل في الحصة.
+          </p>
+
+          <form onSubmit={handleSubmit} className="name-warning-form" noValidate>
+            <label htmlFor="session-code">اسمك الجديد</label>
+            <div className="input-wrap">
+              <input type="text" autoFocus required maxLength={24} value={newName} onChange={(e) => { setNewName(e.target.value); setError(""); }} placeholder="اكتب اسمك الجديد" />
+            </div>
+            {error && (
+              <p className="error-alert">
+                <AlertCircle size={14} /> {error}
+              </p>
+            )}
+          </form>
+
+
+          <div className="modal-actions">
+            <button className="button modal-button white" type="button" onClick={onLeave}>
+              خروج من الحصة
+            </button>
+            
+            <button className="button modal-button turquoise" type="submit">
+              <CheckCircle size={16} />
+              احفظ الاسم الجديد
+            </button>
+          </div>
         </form>
-        <button
-          type="button"
-          className="button ghost name-warning-leave"
-          onClick={onLeave}
-        >
-          خروج من الجلسة
-        </button>
-      </div>
+      </section>
     </div>
   );
 }
 
 // ─────────────────────────────────────────────
-//  Question Panel (زي ما هي)
+//  Question Panel
 // ─────────────────────────────────────────────
 function QuestionPanel({
   question,
@@ -253,7 +261,6 @@ function ReopenedView({ session, student, questions, studentAnswers, liveState }
   const [submitting, setSubmitting] = useState(false);
   const timedOutRef = useRef(null);
 
-  // السؤال الحالي: نستخدم id مش index عشان unanswered بتتقلّب بعد كل إجابة
   const currentQuestion = (() => {
     if (currentQuestionId) {
       const q = unanswered.find((x) => x.id === currentQuestionId);
@@ -263,14 +270,12 @@ function ReopenedView({ session, student, questions, studentAnswers, liveState }
   })();
   const duration = Number(currentQuestion?.duration) || 30;
 
-  // ضبط أول سؤال لما يدخل
   useEffect(() => {
     if (!currentQuestionId && unanswered.length > 0) {
       setCurrentQuestionId(unanswered[0].id);
     }
   }, [unanswered, currentQuestionId]);
 
-  // tick — يشتغل بس لما الطالب يبدأ السؤال
   useEffect(() => {
     if (!started || !currentQuestion) return;
     const i = setInterval(() => setNow(Date.now()), 500);
@@ -304,7 +309,6 @@ function ReopenedView({ session, student, questions, studentAnswers, liveState }
           timeLeft: Math.max(0, timeLeft),
         });
       }
-      // الانتقال للسؤال اللي بعده
       const remaining = unanswered.filter((q) => q.id !== submittedId);
       setCurrentQuestionId(remaining[0]?.id || null);
       setStarted(false);
@@ -316,7 +320,6 @@ function ReopenedView({ session, student, questions, studentAnswers, liveState }
     }
   };
 
-  // لما الوقت يخلص → نبعت timeout ونروح للسؤال اللي بعده (مرة واحدة بس لكل سؤال)
   useEffect(() => {
     if (!started || !currentQuestion) return;
     if (timeLeft > 0) return;
@@ -326,20 +329,18 @@ function ReopenedView({ session, student, questions, studentAnswers, liveState }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeLeft, started, currentQuestion?.id]);
 
-  // 🛡️ حماية: لو الحالة اتغيرت (المدرس قفل الجولة)، نختفي فوراً
   if (liveState && liveState !== "reopened") return null;
 
   if (!allowed) {
     return (
       <div className="live-lobby">
         <div className="live-lobby-icon"><Timer size={36} /></div>
-        <h2>الجلسة مفتوحة للمتأخرين</h2>
+        <h2>الحصة مفتوحة للمتأخرين</h2>
         <p>مش مسموحلك تجاوب دلوقتي. تواصل مع المدرس.</p>
       </div>
     );
   }
 
-  // خلص كل الأسئلة
   if (!currentQuestion) {
     return (
       <div className="live-finished">
@@ -350,7 +351,6 @@ function ReopenedView({ session, student, questions, studentAnswers, liveState }
     );
   }
 
-  // شاشة البداية — قبل ما الطالب يبدأ السؤال
   if (!started) {
     const remainingCount = unanswered.length;
     const doneCount = questions.length - remainingCount;
@@ -377,7 +377,6 @@ function ReopenedView({ session, student, questions, studentAnswers, liveState }
     );
   }
 
-  // السؤال شغال
   const questionNumber = questions.indexOf(currentQuestion) + 1;
   return (
     <div>
@@ -399,7 +398,7 @@ function ReopenedView({ session, student, questions, studentAnswers, liveState }
 }
 
 // ─────────────────────────────────────────────
-//  Leaderboard pieces (زي ما هي)
+//  Leaderboard pieces
 // ─────────────────────────────────────────────
 function StudentAvatar({ player, size = 40 }) {
   const initial = (player?.name || "؟").trim().charAt(0) || "؟";
@@ -446,7 +445,7 @@ function StudentView() {
   const [error, setError]       = useState("");
   const [joined, setJoined]     = useState(null);
   const [reaction, setReaction] = useState(null);
-  const [now, setNow]           = useState(() => Date.now());   // ← timer tick
+  const [now, setNow]           = useState(() => Date.now());
 
   const isCountdown = joined?.session?.live?.state === "countdown";
   const { remaining: countdownRemaining } = useCountdown({
@@ -462,12 +461,58 @@ function StudentView() {
     return () => clearInterval(i);
   }, [joined?.session?.live?.state]);
 
+  // ── Heartbeat: نبلّغ المدرس إننا لسه موجودين كل 20 ثانية ──
+  useEffect(() => {
+    if (!joined?.session?.id || !joined?.student?.id) return;
+    const sessionId = joined.session.id;
+    const studentId = joined.student.id;
+
+    const tick = () => {
+      updateStudent(sessionId, studentId, {
+        lastSeenAt: Date.now(),
+        leftAt: null,
+      }).catch((err) => console.warn("[heartbeat]", err));
+    };
+
+    tick();                              // فوراً
+    const i = setInterval(tick, HEARTBEAT_INTERVAL_MS);
+    return () => clearInterval(i);
+  }, [joined?.session?.id, joined?.student?.id]);
+
+  // ── إعلان الخروج عند قفل التاب / الخروج من الصفحة ──
+  useEffect(() => {
+    if (!joined?.session?.id || !joined?.student?.id) return;
+    const sessionId = joined.session.id;
+    const studentId = joined.student.id;
+
+    const markLeft = () => {
+      updateStudent(sessionId, studentId, { leftAt: Date.now() }).catch(() => {});
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        // رجع للصفحة: نبعت نبضة فوراً + نلغي leftAt (لو كان اتسجل)
+        updateStudent(sessionId, studentId, {
+          lastSeenAt: Date.now(),
+          leftAt: null,
+        }).catch(() => {});
+      }
+    };
+
+    window.addEventListener("beforeunload", markLeft);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("beforeunload", markLeft);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [joined?.session?.id, joined?.student?.id]);
+
   const triggerReaction = (key) => {
     if (!key) return;
     setReaction({ key, id: Date.now() });
   };
 
-  // ── Subscription: تحديث الجلسة + طرد الطالب لو اتحذف ──
+  // ── Subscription: تحديث الحصة + طرد الطالب لو اتحذف ──
   useEffect(() => {
     if (!joined?.session?.id) return;
 
@@ -478,14 +523,14 @@ function StudentView() {
       const fresh = all[sessionId];
 
       if (!fresh) {
-        setError("تم إنهاء الجلسة من قِبل المدرس");
+        setError("تم إنهاء الحصة من قِبل المدرس");
         setJoined(null);
         return;
       }
 
       const stillInSession = (fresh.students || []).some((s) => s.id === studentId);
       if (!stillInSession) {
-        setError("تم إخراجك من الجلسة من قِبل المدرس");
+        setError("تم إخراجك من الحصة من قِبل المدرس");
         setJoined(null);
         return;
       }
@@ -516,16 +561,26 @@ function StudentView() {
     const trimmedName = name.trim();
     const trimmedCode = code.trim();
     if (trimmedName.length < 2) return setError("اكتب اسمك (حرفين على الأقل)");
-    if (!trimmedCode)            return setError("اكتب كود الجلسة");
+    if (!trimmedCode)            return setError("اكتب كود الحصة");
 
     try {
       const session = await findSessionByCode(trimmedCode);
-      if (!session) return setError("الكود غلط أو الجلسة مش موجودة");
+      if (!session) return setError("الكود غلط أو الحصة مش موجودة");
 
       const existing = (session.students || []).find(
         (s) => s.name.trim().toLowerCase() === trimmedName.toLowerCase()
       );
-      if (existing) return setJoined({ session, student: existing });
+
+      // 👈 لو رجع تاني: نحدّث آخر ظهور ونلغي leftAt
+      if (existing) {
+        const updated = await updateStudent(session.id, existing.id, {
+          lastSeenAt: Date.now(),
+          leftAt: null,
+        });
+        const freshStudent =
+          updated?.students?.find((s) => s.id === existing.id) || existing;
+        return setJoined({ session: updated || session, student: freshStudent });
+      }
 
       const student = {
         id: `student-${Date.now()}-${Math.random().toString(16).slice(2, 6)}`,
@@ -539,6 +594,8 @@ function StudentView() {
         currentStreak: 0,
         finishedAt: null,
         joinedAt: Date.now(),
+        lastSeenAt: Date.now(),   // 👈 جديد
+        leftAt: null,             // 👈 جديد
       };
       const updated = await addStudentToSession(session.id, student);
       if (!updated) return setError("مقدرناش ننضمّك، حاول تاني");
@@ -549,7 +606,17 @@ function StudentView() {
     }
   };
 
-  const handleLeave = () => {
+  const handleLeave = async () => {
+    // 👈 نعلن الخروج قبل ما نصفّر الحالة
+    if (joined?.session?.id && joined?.student?.id) {
+      try {
+        await updateStudent(joined.session.id, joined.student.id, {
+          leftAt: Date.now(),
+        });
+      } catch (e) {
+        console.warn("[handleLeave]", e);
+      }
+    }
     setJoined(null);
     setName("");
     setCode("");
@@ -597,7 +664,6 @@ function StudentView() {
       return;
     }
 
-    // احسب الوقت المتبقي محلياً من startedAt (للـ speed bonus/reaction)
     const dur = Number(currentQuestion.duration) || 30;
     const localTimeLeft = (() => {
       if (live.state === "question" && live.startedAt) {
@@ -649,16 +715,14 @@ function StudentView() {
                   <span className="card-icon yellow"><KeyRound size={26} /></span>
                   <div>
                     <span className="card-eyebrow">هتدخل على طول</span>
-                    <h2>كود الجلسة</h2>
+                    <h2>اسمك وكود الحصة</h2>
                   </div>
                 </div>
               </div>
 
-              <p className="card-description">اكتب اسمك وكود الحصة.</p>
-
               <form className="join-form" onSubmit={handleJoin} noValidate>
                 <label htmlFor="student-name">اسمك</label>
-                <div className="join-input-wrap">
+                <div className="input-wrap">
                   <input
                     id="student-name"
                     type="text"
@@ -670,8 +734,8 @@ function StudentView() {
                   />
                 </div>
 
-                <label htmlFor="session-code">كود الجلسة</label>
-                <div className="join-input-wrap">
+                <label htmlFor="session-code">كود الحصة</label>
+                <div className="input-wrap">
                   <KeyRound size={17} aria-hidden="true" />
                   <input
                     id="session-code"
@@ -685,13 +749,13 @@ function StudentView() {
                 </div>
 
                 {error && (
-                  <p style={{ color: "#c53030", fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
+                  <p className="error-alert">
                     <AlertCircle size={14} /> {error}
                   </p>
                 )}
 
                 <button className="button button-primary join-submit" type="submit">
-                  ادخل الجلسة <ArrowLeft size={18} />
+                  ادخل الحصة <ArrowLeft size={18} />
                 </button>
               </form>
             </div>
@@ -711,7 +775,6 @@ function StudentView() {
   const currentQuestion = questions[questionIndex] || null;
   const duration = Number(currentQuestion?.duration) || 30;
 
-  // timeLeft: derived from startedAt (backend-authoritative)
   const timeLeft = (() => {
     if (live.state === "question" && live.startedAt) {
       const elapsed = Math.floor((now - live.startedAt) / 1000);
@@ -802,7 +865,7 @@ function StudentView() {
               <div className="live-lobby">
                 <div className="live-lobby-icon"><Users size={36} /></div>
                 <h2>مستنيين المدرس يبدأ</h2>
-                <p>لسه الجلسة ما بدأتش. هيفتحلك الأسئلة قريب.</p>
+                <p>لسه الحصة ما بدأتش. هيفتحلك الأسئلة قريب.</p>
                 <div className="live-lobby-pulse" />
               </div>
             )}
@@ -844,7 +907,7 @@ function StudentView() {
             {liveState === "paused" && currentQuestion && (
               <div>
                 <div className="session-status status-paused" style={{ marginBottom: 12 }}>
-                  <i /> المدرس وقّف الجلسة مؤقتاً
+                  <i /> المدرس وقّف الحصة مؤقتاً
                 </div>
                 <QuestionPanel
                   question={currentQuestion}
@@ -877,7 +940,7 @@ function StudentView() {
             {liveState === "finished" && (
               <div className="live-finished">
                 <Trophy size={52} />
-                <h2>خلصت الجلسة!</h2>
+                <h2>خلصت الحصة!</h2>
                 <p>نتيجتك: <b>{formatNumber(freshStudent.score)}</b> نقطة</p>
                 <p>
                   صح: <b>{formatNumber(freshStudent.correctAnswers)}</b> —{" "}
@@ -895,16 +958,17 @@ function StudentView() {
                 student={joined.student}
                 questions={questions}
                 studentAnswers={studentAnswers}
+                liveState={liveState}
               />
             )}
 
             <button
               type="button"
-              className="button ghost"
+              className="button button-primary ghost"
               onClick={handleLeave}
               style={{ marginTop: 8 }}
             >
-              خروج من الجلسة
+              خروج من الحصة
             </button>
           </div>
 

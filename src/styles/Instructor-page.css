@@ -430,8 +430,7 @@
   height: 42px;
   padding: 0;
   color: var(--C-yalla-text-secondary);
-  transition:
-    color 0.12s ease;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
 }
 
 .open-delete-modal-button {
@@ -1231,84 +1230,20 @@
   cursor: default;
 }
 
-.delete-student-button {
+.delete-student-button, .kick-student-button {
   color: #dc2626;
 }
-.delete-student-button:hover {
+.delete-student-button:hover, .kick-student-button:hover {
   background: rgba(220, 38, 38, 0.1);
 }
 
-/* =========================================
-  Create Session Modals
-  ========================================= */
-
-.create-session-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  color: var(--C-yalla-text-secondary);
-  font-size: 0.85rem;
-  font-weight: 700;
+/* ===== Online / Offline states ===== */
+.student-row--offline .col-name {
+  color: #9ca3af;
 }
 
-.create-session-field input,
-.create-session-field select {
-  width: 100%;
-  min-height: 48px;
-  padding: 10px 14px;
-  background: var(--C-yalla-fg);
-  color: var(--C-yalla-bg);
-  border: var(--yalla-border);
-  border-radius: var(--yalla-radius-sm);
-  font-size: 0.95rem;
+.student-row--online .col-name {
   font-weight: 600;
-  outline: none;
-  transition: outline 0.12s ease;
-}
-
-.create-session-field input::placeholder {
-  color: rgba(11, 31, 42, 0.5);
-}
-
-.create-session-field select {
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230B1F2A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: left 14px center;
-  background-size: 16px;
-  padding-left: 40px;
-}
-
-.create-session-fields-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.create-session-field-control {
-  position: relative;
-  display: flex;
-  align-items: center;
-  direction: ltr;
-}
-
-.create-session-field svg {
-  position: absolute;
-  right: 20px;
-  color: var(--C-yalla-primary-strong);
-  pointer-events: none;
-  background-color: var(--C-yalla-fg);
-  cursor: pointer;
-}
-
-.create-session-field-control input[type="date"]::-webkit-calendar-picker-indicator,
-.create-session-field-control input[type="time"]::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  opacity: 0;
-  width: 24px;
-  height: 24px;
-  
 }
 
 /* =========================================
