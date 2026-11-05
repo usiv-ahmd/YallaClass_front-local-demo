@@ -56,7 +56,10 @@
   --yalla-shadow-sm: 4px 4px 0 var(--C-yalla-bg);
   --yalla-shadow-button:4px 4px 0 var(--C-yalla-bg);
   --yalla-shadow-button-hover: 6px 6px 0 var(--C-yalla-border-strong);
-  --center-shadow: 0 6px 0 var(--C-yalla-border-strong);
+  --yalla-center-shadow: 0 6px 0 var(--C-yalla-border-strong);
+  --yalla-center-shadow-sm: 0 4px 0 var(--C-yalla-bg);
+  --yalla-center-shadow-button:0 4px 0 var(--C-yalla-bg);
+  --yalla-center-shadow-button-hover: 0 6px 0 var(--C-yalla-border-strong);
 
   --yalla-border: 3px solid var(--C-yalla-border-strong);
 }

@@ -4,6 +4,7 @@ import { Presentation, ArrowLeft } from 'lucide-react';
 import '../styles/auth.css';
 
 export default function Register() {
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -54,7 +55,9 @@ export default function Register() {
                 <input type="text" name="specialty" placeholder="التخصص / المجال" onChange={handleChange} />
               </div>
 
-              <button type="submit" className="submit-btn">إنشاء حساب مدرس</button>
+              {error && <p className="error-alert">{error}</p>}
+
+              <button type="submit" className="submit-btn red">إنشاء حساب مدرس</button>
             </form>
 
             <p className="auth-switch">

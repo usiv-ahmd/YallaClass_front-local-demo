@@ -70,9 +70,9 @@ export default function Login() {
                 />
               </div>
 
-              {error && <p className="auth-error">{error}</p>}
+              {error && <p className="error-alert">{error}</p>}
 
-              <button type="submit" className="submit-btn">دخول كمدرس</button>
+              <button type="submit" className="submit-btn red">دخول كمدرس</button>
             </form>
 
             <span className="auth-switch">

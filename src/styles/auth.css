@@ -42,22 +42,22 @@
 }
 
 
-.auth-container input:focus {
-  border-color: var(--C-yalla-highlight);
-}
+
 
 .submit-btn {
   margin-top: 8px;
   margin-bottom: 20px;
   padding: 12px;
-  background: var(--C-yalla-danger);
-  color: var(--C-yalla-fg);
   font-family: var(--font-display);
   font-size: 19px;
   border: 3px solid var(--C-yalla-border-strong);
   border-radius: 14px;
-  box-shadow: var(--center-shadow);
+  box-shadow: var(--yalla-center-shadow-sm);
   transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.submit-btn:hover {
+  box-shadow: var(--yalla-center-shadow);
 }
 
 .submit-btn:active {
