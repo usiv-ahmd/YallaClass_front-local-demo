@@ -1811,10 +1811,6 @@
   animation: none;
 }
 
-@keyframes stuPulse {
-  40% { transform: scale(1.08); }
-}
-
 /* ============================================================
    Auto-Advance Toggle & Countdown
    ============================================================ */
@@ -1875,9 +1871,4 @@
   font: 700 12px var(--font-display, inherit);
   color: #FFD23F;
   animation: autoAdvancePulse 1s ease-in-out infinite;
-}
-
-@keyframes autoAdvancePulse {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0.7; }
 }
