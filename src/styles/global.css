@@ -715,3 +715,64 @@ input:-webkit-autofill:active {
     /* Optional: transition hack if box-shadow doesn't fully work */
     transition: background-color 5000s ease-in-out 0s;
 }
+
+/* ============================================================
+   6. Keyframes
+   ============================================================ */
+
+@keyframes autoAdvancePulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.7; }
+}
+
+@keyframes stuPulse {
+  0%, 100% { transform: scale(1);}
+  40% { transform: scale(1.08); }
+}
+
+   @keyframes lbPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(.6); opacity: .5; }
+}
+
+@keyframes lbCrown {
+  50% { transform: translateX(-50%) translateY(-3px) scale(1.1); }
+}
+
+@keyframes statusBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .4; transform: scale(.7); }
+}
+
+@keyframes lobbyPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.4); opacity: .4; }
+}
+
+@keyframes countdownPop {
+  0%   { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-5px); }
+  40%      { transform: translateX(5px); }
+  60%      { transform: translateX(-3px); }
+  80%      { transform: translateX(3px); }
+}
+
+@keyframes answerCorrectPulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.015); }
+  100% { transform: scale(1); }
+}
+
+@keyframes answerWrongShake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-6px); }
+  40%      { transform: translateX(6px); }
+  60%      { transform: translateX(-3px); }
+  80%      { transform: translateX(3px); }
+}
